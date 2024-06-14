@@ -12,6 +12,7 @@ class Syncer {
 
     private let accountInfoManager: AccountInfoManager
     private let transactionManager: TransactionManager
+    private let reachabilityManager: ReachabilityManager
 
     private let api: TonApi
 
@@ -48,6 +49,7 @@ class Syncer {
          logger: Logger?) {
         self.accountInfoManager = accountInfoManager
         self.transactionManager = transactionManager
+        self.reachabilityManager = reachabilityManager
         self.api = api
         self.backgroundUpdateStore = backgroundUpdateStore
         self.storage = storage
@@ -59,12 +61,13 @@ class Syncer {
                 self?.handle(isReachable: isReachable)
             }
             .store(in: &cancellables)
-        }
+    }
     
     private func handle(isReachable: Bool) {
+        logger?.log(level: .debug, message: "Handle reachable \(isReachable)")
         if isReachable {
             Task { [weak self] in
-               await self?.subscribeUpdates()
+               await self?.startBackgroundUpdate()
             }
         }
     }
@@ -92,6 +95,16 @@ extension Syncer {
                     Task { [weak self] in
                         self?.logger?.log(level: .debug, message: "Try Update from connected background Update")
                         await observer.update(forced: false)
+                    }
+                case .noConnection:
+                    Task { [weak self] in
+                        self?.logger?.log(level: .error, message: "Stream has no connection")
+                        self?.set(state: .notSynced(error: Kit.SyncError.noNetworkConnection))
+                    }
+                case .disconnected:
+                    Task { [weak self] in
+                        self?.logger?.log(level: .error, message: "Strean has disconnected")
+                        self?.set(state: .notSynced(error: Kit.SyncError.disconnected))
                     }
                 default: break
                 }
@@ -122,7 +135,9 @@ extension Syncer {
     }
 
     public func stopBackgroundUpdate() async {
-        await backgroundUpdateStore.stop()
+        Task { [weak self] in
+            await self?.backgroundUpdateStore.stop()
+        }
     }
 }
 

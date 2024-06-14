@@ -1,5 +1,6 @@
 import EventSource
 import Foundation
+import HsToolKit
 import OpenAPIRuntime
 import TonStreamingAPI
 import TonSwift
@@ -34,9 +35,11 @@ public actor BackgroundUpdateStore {
     private let jsonDecoder = JSONDecoder()
 
     private let streamingAPI: TonStreamingAPI.Client
+    private let logger: Logger?
 
-    init(streamingAPI: TonStreamingAPI.Client) {
+    init(streamingAPI: TonStreamingAPI.Client, logger: Logger?) {
         self.streamingAPI = streamingAPI
+        self.logger = logger
     }
 
     public func start(addresses: [Address]) async {
@@ -56,6 +59,7 @@ public actor BackgroundUpdateStore {
 
     public func stop() async {
         task?.cancel()
+        observations.removeAll()
         task = nil
     }
 
@@ -127,6 +131,7 @@ private extension BackgroundUpdateStore {
     }
 
     func handleReceivedEvents(_ events: [EventSource.Event]) {
+        logger?.log(level: .debug, message: "-> receive events :\(events.count)")
         guard let messageEvent = events.last(where: { $0.event == "message" }),
               let eventData = messageEvent.data?.data(using: .utf8)
         else {

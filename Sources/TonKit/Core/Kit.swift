@@ -19,7 +19,7 @@ public class Kit {
     public let address: Address
     public let network: Network
     public let uniqueId: String
-    public let logger: Logger
+    public let logger: Logger?
     
     @Published public var updateState: String  = "idle"
 
@@ -28,7 +28,7 @@ public class Kit {
          accountInfoManager: AccountInfoManager,
          transactionManager: TransactionManager,
          transactionSender: TransactionSender?,
-         logger: Logger)
+         logger: Logger?)
     {
         self.address = address
         self.network = network
@@ -42,6 +42,8 @@ public class Kit {
         syncer.$updateState.sink { [weak self] state in
             self?.updateState = state
         }.store(in: &cancellables)
+        
+        
     }
 }
 
@@ -137,8 +139,7 @@ extension Kit {
         }
     }
 
-    public static func instance(type: WalletType, network: Network, walletId: String, apiKey _: String?, minLogLevel: Logger.Level = .error) throws -> Kit {
-        let logger = Logger(minLogLevel: minLogLevel)
+    public static func instance(type: WalletType, network: Network, walletId: String, apiKey _: String?, logger: Logger?) throws -> Kit {
         let uniqueId = "\(walletId)-\(network.rawValue)"
 
         let reachabilityManager = ReachabilityManager()
@@ -164,7 +165,7 @@ extension Kit {
         )
 
         let streamingTonAPIClient = TonStreamingAPI.Client(serverURL: serverUrl, transport: transport.streamingTransport, middlewares: [])
-        let backgroundUpdateStore = BackgroundUpdateStore(streamingAPI: streamingTonAPIClient)
+        let backgroundUpdateStore = BackgroundUpdateStore(streamingAPI: streamingTonAPIClient, logger: logger)
 
         let syncer = Syncer(
             accountInfoManager: accountInfoManager,
@@ -243,6 +244,7 @@ public extension Kit {
     enum SyncError: Error {
         case notStarted
         case noNetworkConnection
+        case disconnected
     }
 
     enum KitError: Error {

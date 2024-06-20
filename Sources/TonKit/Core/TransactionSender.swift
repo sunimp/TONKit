@@ -27,7 +27,7 @@ public struct Amount {
 }
 
 extension TransactionSender {
-    func estimatedFee(recipient: FriendlyAddress, amount: Amount, comment: String?) async throws -> Decimal {
+    func estimatedFee(recipient: FriendlyAddress, jetton: Jetton? = nil, amount: Amount, comment: String?) async throws -> Decimal {
         do {
             let seqno = try await api.getSeqno(address: sender)
             let timeout = await api.timeoutSafely()
@@ -45,7 +45,13 @@ extension TransactionSender {
                 try transfer.signMessage(signer: WalletTransferEmptyKeySigner())
             }
 
-            let boc = try await TonTransferBoc(transferData: data).create()
+            let boc: String
+            if let jetton {
+                boc = try await JettonTransferBoc(jetton: jetton.walletAddress, transferData: data).create()
+            } else {
+                boc = try await TonTransferBoc(transferData: data).create()
+            }
+            
             let transactionInfo = try await api.emulateMessageWallet(boc: boc)
 
             // for nfts transactionInfo.event can contains extra
@@ -56,7 +62,7 @@ extension TransactionSender {
         }
     }
 
-    func sendTransaction(recipient: FriendlyAddress, amount: Amount, comment: String?) async throws {
+    func sendTransaction(recipient: FriendlyAddress, jetton: Jetton? = nil, amount: Amount, comment: String?) async throws {
         let seqno = try await api.getSeqno(address: sender)
         let timeout = await api.timeoutSafely()
         let secretKey = secretKey
@@ -75,7 +81,13 @@ extension TransactionSender {
             try transfer.signMessage(signer: WalletTransferSecretKeySigner(secretKey: secretKey))
         }
 
-        let boc = try await TonTransferBoc(transferData: data).create()
+        let boc: String
+        if let jetton {
+            boc = try await JettonTransferBoc(jetton: jetton.walletAddress, transferData: data).create()
+        } else {
+            boc = try await TonTransferBoc(transferData: data).create()
+        }
+
         try await api.sendTransaction(boc: boc)
     }
 }

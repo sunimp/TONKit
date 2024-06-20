@@ -36,8 +36,8 @@ public class TonTransfer: Action {
 }
 
 extension TonTransfer: IActionRecord {
-    func save(db: Database, index: Int) throws {
-        try TonTransferRecord.record(index: index, self).save(db)
+    func save(db: Database, index: Int, lt: Int64) throws {
+        try TonTransferRecord.record(index: index, lt: lt, self).save(db)
         try WalletAccountRecord.record(recipient).save(db)
         try WalletAccountRecord.record(sender).save(db)
     }

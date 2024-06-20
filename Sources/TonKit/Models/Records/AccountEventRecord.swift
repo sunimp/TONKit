@@ -76,7 +76,7 @@ extension Collection<AccountEventRecord> {
 }
 
 extension AccountEventRecord {
-    func accountEvent(walletAccount: WalletAccount, actions: [Action]) -> AccountEvent? {
+    func accountEvent(walletAccount: WalletAccount, actions: [Action]) -> AccountEvent {
         return AccountEvent(
             eventId: eventId,
             timestamp: timestamp,

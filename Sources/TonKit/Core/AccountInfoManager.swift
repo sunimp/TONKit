@@ -27,19 +27,25 @@ extension AccountInfoManager {
         storage.jettonBalance(address: address.toRaw()) ?? 0
     }
 
-    func jettonBalancePublisher(contractAddress: Address) -> AnyPublisher<BigUInt, Never> {
-        jettonBalanceSubject.filter { $0.0 == contractAddress }.map { $0.1 }.eraseToAnyPublisher()
+    func jettonBalancePublisher(address: Address) -> AnyPublisher<BigUInt, Never> {
+        jettonBalanceSubject.filter { $0.0 == address }.map { $0.1 }.eraseToAnyPublisher()
+    }
+    
+    var jettons: [Jetton] {
+        storage.jettons
     }
 
     func handle(account: Account) {
         let tonBalance = BigUInt(account.balance)
         storage.save(tonBalance: tonBalance)
         tonBalanceSubject.send(tonBalance)
-
-//        storage.clearTrc20Balances()
-//        for (address, value) in accountInfoResponse.jetton {
-//            storage.save(jettonBalance: value, address: address.base58)
-//            jettonBalanceSubject.send((address, value))
-//        }
+    }
+    
+    func handle(jettonBalances: [JettonBalance]) {
+        storage.clearJettonBalances()
+        storage.save(jettonBalances: jettonBalances)
+        for balance in jettonBalances {
+            jettonBalanceSubject.send((balance.item.jettonInfo.address, balance.quantity))
+        }
     }
 }

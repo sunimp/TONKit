@@ -9,6 +9,11 @@ import TonStreamingAPI
 import TonSwift
 
 public class Kit {
+    static let tonId = "TON"
+
+    static func jettonId(address: String) -> String { "TON/\(address)" }
+    static func address(jettonId: String) -> String { String(jettonId.dropFirst(4)) }
+
     var cancellables = Set<AnyCancellable>()
     
     private let syncer: Syncer
@@ -62,8 +67,20 @@ public extension Kit {
         accountInfoManager.tonBalance
     }
 
+    func jettonBalance(address: Address) -> BigUInt {
+        accountInfoManager.jettonBalance(address: address)
+    }
+
+    func jettonBalancePublisher(address: Address) -> AnyPublisher<BigUInt, Never> {
+        accountInfoManager.jettonBalancePublisher(address: address)
+    }
+
     var receiveAddress: Address {
         address
+    }
+    
+    var jettons: [Jetton] {
+        accountInfoManager.jettons
     }
 
     var syncStatePublisher: AnyPublisher<SyncState, Never> {
@@ -74,7 +91,7 @@ public extension Kit {
         accountInfoManager.tonBalancePublisher
     }
 
-    func transactionsPublisher(tagQueries: [TransactionTagQuery]) -> AnyPublisher<[FullTransaction], Never> {
+    func transactionsPublisher(tagQueries: [TransactionTagQuery]?) -> AnyPublisher<[FullTransaction], Never> {
         transactionManager.fullTransactionsPublisher(tagQueries: tagQueries)
     }
 
@@ -82,28 +99,25 @@ public extension Kit {
         transactionManager.fullTransactions(tagQueries: tagQueries, beforeLt: beforeLt, limit: limit)
     }
 
-    func estimateFee(recipient: String, amount: Decimal, comment: String?) async throws -> Decimal {
+    func estimateFee(recipient: String, jetton: Jetton? = nil, amount: BigUInt, comment: String?) async throws -> Decimal {
         guard let transactionSender else {
             throw WalletError.watchOnly
         }
         let address = try FriendlyAddress(string: recipient)
-        let value = BigUInt(amount.description) ?? 0
-        let amount = Amount(value: value, isMax: value == balance)
+        let amount = Amount(value: amount, isMax: amount == balance)
 
-        return try await transactionSender.estimatedFee(recipient: address, amount: amount, comment: comment)
+        return try await transactionSender.estimatedFee(recipient: address, jetton: jetton, amount: amount, comment: comment)
     }
 
-    func send(recipient: String, amount: Decimal, comment: String?) async throws {
+    func send(recipient: String, jetton: Jetton? = nil, amount: BigUInt, comment: String?) async throws {
         guard let transactionSender else {
             throw WalletError.watchOnly
         }
 
         let address = try FriendlyAddress(string: recipient)
-        let value = BigUInt(amount.description) ?? 0
-        
-        let amount = Amount(value: value, isMax: value == balance)
+        let amount = Amount(value: amount, isMax: amount == balance)
 
-        return try await transactionSender.sendTransaction(recipient: address, amount: amount, comment: comment)
+        return try await transactionSender.sendTransaction(recipient: address, jetton: jetton, amount: amount, comment: comment)
     }
 
     func start() {
@@ -194,7 +208,13 @@ extension Kit {
             logger: logger
         )
 
-        decorationManager.add(transactionDecorator: TonTransferDecorator(address: address))
+        let transferDecorator = TransferDecorator(address: address)
+        transferDecorator.decorations.append(IncomingDecoration.self)
+        transferDecorator.decorations.append(OutgoingDecoration.self)
+        transferDecorator.decorations.append(IncomingJettonDecoration.self)
+        transferDecorator.decorations.append(OutgoingJettonDecoration.self)
+
+        decorationManager.add(transactionDecorator: transferDecorator)
 
         return kit
     }
@@ -248,6 +268,7 @@ public extension Kit {
     }
 
     enum KitError: Error {
+        case parsingError
         case custom(String)
     }
 

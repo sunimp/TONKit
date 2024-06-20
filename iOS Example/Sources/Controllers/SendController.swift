@@ -136,7 +136,7 @@ class SendController: UIViewController {
     @objc private func updateEstimatedFee() {
         guard let address = addressTextField.text?.trimmingCharacters(in: .whitespaces),
               let valueText = amountTextField.text,
-              let value = Decimal(string: valueText),
+              let value = Int(valueText),
               value > 0
         else {
             return
@@ -146,8 +146,7 @@ class SendController: UIViewController {
 
         Task { [weak self, adapter] in
             do {
-                let amount = Amount(value: 1_000_000_000, isMax: false)
-                let fee = try await adapter.estimateFee(recipient: address, amount: value, comment: "")
+                let fee = try await adapter.estimateFee(recipient: address, amount: BigUInt(value), comment: "")
 
                 self?.sendButton.isEnabled = value > 0
                 self?.gasPriceLabel.text = fee.description
@@ -171,7 +170,7 @@ class SendController: UIViewController {
         
         let address = validated.address.toString(bounceable: true)
 
-        guard let valueText = amountTextField.text, let value = Decimal(string: valueText), value > 0 else {
+        guard let valueText = amountTextField.text, let value = BigUInt(valueText, radix: 10), value > 0 else {
             show(error: "Invalid amount")
             return
         }
@@ -196,7 +195,7 @@ class SendController: UIViewController {
     }
 
     @MainActor
-    private func handleSuccess(address: String, amount: Decimal) {
+    private func handleSuccess(address: String, amount: BigUInt) {
         addressTextField.text = ""
         amountTextField.text = ""
         gasPriceLabel.text = ""

@@ -1,6 +1,7 @@
 import Combine
 import SnapKit
 import TonKit
+import TonSwift
 import UIKit
 
 class BalanceController: UIViewController {
@@ -10,6 +11,9 @@ class BalanceController: UIViewController {
     private let titlesLabel = UILabel()
     private let valuesLabel = UILabel()
     private let errorsLabel = UILabel()
+    
+    private let tableView = UITableView()
+    private var balances = [JettonBalance]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,6 +52,17 @@ class BalanceController: UIViewController {
         errorsLabel.numberOfLines = 0
         errorsLabel.font = .systemFont(ofSize: 12)
         errorsLabel.textColor = .red
+        
+        view.addSubview(tableView)
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(errorsLabel.snp.bottom).offset(16)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.bottom.equalTo(view.safeAreaLayoutGuide)
+        }
+
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.registerCell(forClass: BalanceCell.self)
 
         Publishers.MergeMany(adapter.syncStatePublisher, adapter.transactionsSyncStatePublisher, adapter.balancePublisher)
             .receive(on: DispatchQueue.main)
@@ -104,5 +119,33 @@ class BalanceController: UIViewController {
         \(syncStateString)
         \(adapter.balance) \(adapter.coin)
         """, alignment: .right)
+
+        tableView.reloadData()
+    }
+}
+
+extension BalanceController: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return adapter.jettons.count
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 44
+    }
+        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        return tableView.dequeueReusableCell(withIdentifier: String(describing: BalanceCell.self), for: indexPath)
+    }
+
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if let cell = cell as? BalanceCell {
+            cell.backgroundColor = .white
+            
+            let jettons = adapter.jettons
+            guard jettons.count > indexPath.row else { return }
+            let jetton = jettons[indexPath.row]
+            
+            cell.bind(title: jetton.address.toRaw(), value: adapter.jettonBalance(address: jetton.address))
+        }
     }
 }

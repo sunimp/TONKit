@@ -2,10 +2,12 @@ import GRDB
 
 class InitialSyncCompleted: Record {
     let api: String
+    let id: String
     let completed: Bool
 
-    init(api: String, completed: Bool) {
+    init(api: String, id: String, completed: Bool) {
         self.api = api
+        self.id = id
         self.completed = completed
 
         super.init()
@@ -17,11 +19,13 @@ class InitialSyncCompleted: Record {
 
     enum Columns: String, ColumnExpression, CaseIterable {
         case api
+        case id
         case completed
     }
 
     required init(row: Row) throws {
         api = row[Columns.api]
+        id = row[Columns.id]
         completed = row[Columns.completed]
 
         try super.init(row: row)
@@ -29,6 +33,7 @@ class InitialSyncCompleted: Record {
 
     override public func encode(to container: inout PersistenceContainer) {
         container[Columns.api] = api
+        container[Columns.id] = id
         container[Columns.completed] = completed
     }
 }

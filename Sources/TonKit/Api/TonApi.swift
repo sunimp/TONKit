@@ -19,9 +19,9 @@ struct TonApi {
 // MARK: - Account
 
 extension TonApi {
-    func getAccountInfo(address: String) async throws -> Account {
+    func getAccountInfo(address: Address) async throws -> Account {
         let response = try await tonAPIClient
-            .getAccount(.init(path: .init(account_id: address)))
+            .getAccount(.init(path: .init(account_id: address.toRaw())))
         return try Account(account: response.ok.body.json)
     }
 
@@ -50,7 +50,9 @@ extension TonApi {
 extension TonApi {
     func getAccountEvents(address: Address,
                           beforeLt: Int64?,
-                          limit: Int, start: Int64? = nil, end: Int64? = nil) async throws -> AccountEvents
+                          limit: Int, 
+                          start: Int64? = nil,
+                          end: Int64? = nil) async throws -> AccountEvents
     {
         let response = try await tonAPIClient.getAccountEvents(
             path: .init(account_id: address.toRaw()),
@@ -73,15 +75,17 @@ extension TonApi {
     func getAccountJettonEvents(address: Address,
                                 jettonInfo: JettonInfo,
                                 beforeLt: Int64?,
-                                limit: Int) async throws -> AccountEvents
+                                limit: Int, 
+                                start: Int64? = nil,
+                                end: Int64? = nil) async throws -> AccountEvents
     {
         let response = try await tonAPIClient.getAccountJettonHistoryByID(
             path: .init(account_id: address.toRaw(),
                         jetton_id: jettonInfo.address.toRaw()),
             query: .init(before_lt: beforeLt,
                          limit: limit,
-                         start_date: nil,
-                         end_date: nil)
+                         start_date: start,
+                         end_date: end)
         )
         let entity = try response.ok.body.json
         let events: [AccountEvent] = entity.events.compactMap {

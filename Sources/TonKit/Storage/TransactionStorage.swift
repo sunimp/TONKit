@@ -54,6 +54,7 @@ class AccountEventStorage {
             try db.create(table: TonTransferRecord.databaseTableName) { t in
                 t.column(TonTransferRecord.Columns.eventId.name, .text).notNull()
                 t.column(TonTransferRecord.Columns.index.name, .integer).notNull()
+                t.column(TonTransferRecord.Columns.lt.name, .integer).notNull()
                 t.column(TonTransferRecord.Columns.senderUid.name, .text).notNull()
                 t.column(TonTransferRecord.Columns.recipientUid.name, .text).notNull()
                 t.column(TonTransferRecord.Columns.amount.name, .integer).notNull()
@@ -72,6 +73,23 @@ class AccountEventStorage {
                 t.column(TransactionTagRecord.Columns.addresses.name, .text).notNull()
 
                 t.foreignKey([TransactionTagRecord.Columns.eventId.name], references: AccountEventRecord.databaseTableName, columns: [AccountEventRecord.Columns.eventId.name], onDelete: .cascade, onUpdate: .cascade, deferred: true)
+            }
+        }
+
+        migrator.registerMigration("create JettonTransfer") { db in
+            try db.create(table: JettonTransferRecord.databaseTableName) { t in
+                t.column(JettonTransferRecord.Columns.eventId.name, .text).notNull()
+                t.column(JettonTransferRecord.Columns.index.name, .integer).notNull()
+                t.column(JettonTransferRecord.Columns.lt.name, .integer).notNull()
+                t.column(JettonTransferRecord.Columns.senderUid.name, .text)
+                t.column(JettonTransferRecord.Columns.recipientUid.name, .text)
+                t.column(JettonTransferRecord.Columns.senderAddressUid.name, .text).notNull()
+                t.column(JettonTransferRecord.Columns.recipientAddressUid.name, .text).notNull()
+                t.column(JettonTransferRecord.Columns.amount.name, .text).notNull()
+                t.column(JettonTransferRecord.Columns.jettonAddressUid.name, .text).notNull()
+                t.column(JettonTransferRecord.Columns.comment.name, .text)
+
+                t.primaryKey([JettonTransferRecord.Columns.eventId.name, JettonTransferRecord.Columns.index.name], onConflict: .replace)
             }
         }
 
@@ -175,18 +193,36 @@ extension AccountEventStorage {
         }
     }
 
-    func lastEventRecord(newest: Bool) -> AccountEventRecord? {
+    func lastEventRecord(newest: Bool, jettonAddressUid: String?) -> AccountEventRecord? {
         try! dbPool.read { db in
-            try AccountEventRecord
-                .order(newest ? AccountEventRecord.Columns.lt.desc : AccountEventRecord.Columns.lt.asc)
+            if let jettonAddressUid {
+                guard let record = try JettonTransferRecord
+                    .filter(JettonTransferRecord.Columns.jettonAddressUid == jettonAddressUid)
+                    .order(newest ? JettonTransferRecord.Columns.lt.desc : JettonTransferRecord.Columns.lt.asc)
+                    .fetchOne(db) else {
+
+                    return nil
+                }
+                return try AccountEventRecord
+                    .filter(AccountEventRecord.Columns.eventId == record.eventId)
+                    .fetchOne(db)
+            }
+            guard let record = try TonTransferRecord
+                .order(newest ? TonTransferRecord.Columns.lt.desc : TonTransferRecord.Columns.lt.asc)
+                .fetchOne(db) else {
+
+                return nil
+            }
+            return try AccountEventRecord
+                .filter(AccountEventRecord.Columns.eventId == record.eventId)
                 .fetchOne(db)
         }
     }
 
-    static func save(db: Database, actions: [Action]) throws {
+    static func save(db: Database, lt: Int64, actions: [Action]) throws {
         for (index, action) in actions.enumerated() {
             if let action = action as? IActionRecord {
-                try action.save(db: db, index: index)
+                try action.save(db: db, index: index, lt: lt)
             }
         }
     }
@@ -201,14 +237,8 @@ extension AccountEventStorage {
 
                 try record.save(db)
                 try WalletAccountRecord.record(event.account).save(db)
-                try AccountEventStorage.save(db: db, actions: event.actions)
+                try AccountEventStorage.save(db: db, lt: event.lt, actions: event.actions)
             }
-        }
-    }
-
-    func save(actions: [Action]) {
-        try! dbPool.write { db in
-            try AccountEventStorage.save(db: db, actions: actions)
         }
     }
 

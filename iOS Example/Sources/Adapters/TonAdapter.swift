@@ -63,6 +63,18 @@ extension TonAdapter {
         return 0
     }
 
+    func jettonBalance(address: Address) -> BigUInt {
+        tonKit.jettonBalance(address: address)
+    }
+
+    func jettonBalancePublisher(address: Address) -> AnyPublisher<BigUInt, Never> {
+        tonKit.jettonBalancePublisher(address: address)
+    }
+    
+    var jettons: [Jetton] {
+        tonKit.jettons
+    }
+
     var receiveAddress: Address {
         tonKit.receiveAddress
     }
@@ -80,29 +92,36 @@ extension TonAdapter {
     }
 
     var transactionsPublisher: AnyPublisher<Void, Never> {
-        tonKit.transactionsPublisher(tagQueries: []).map { _ in () }.eraseToAnyPublisher()
+        tonKit.transactionsPublisher(tagQueries: nil).map { _ in () }.eraseToAnyPublisher()
     }
 
     func transactions(from lt: Int64?, limit: Int?) -> [TransactionRecord] {
         tonKit.transactions(tagQueries: [], beforeLt: lt, limit: limit).compactMap { transactionRecord(fullTransaction: $0) }
     }
 
-    func estimateFee(recipient: String, amount: Decimal, comment: String?) async throws -> Decimal {
-        let amount = amount
-        try await tonKit.estimateFee(recipient: recipient, amount: amount, comment: comment)
+    func estimateFee(recipient: String, jetton: Jetton? = nil, amount: BigUInt, comment: String?) async throws -> Decimal {
+        return try await tonKit.estimateFee(recipient: recipient, jetton: jetton, amount: amount, comment: comment)
     }
 
     func transaction(eventId: String) async throws -> FullTransaction {
         try await tonKit.fetchTransaction(eventId: eventId)
     }
 
-    func send(recipient: String, amount: Decimal, comment: String?) async throws {
-        try await tonKit.send(recipient: recipient, amount: amount, comment: comment)
+    func send(recipient: String, jetton: Jetton? = nil, amount: BigUInt, comment: String?) async throws {
+        try await tonKit.send(recipient: recipient, jetton: jetton, amount: amount, comment: comment)
     }
 }
 
 extension TonAdapter {
     enum SendError: Error {
         case noSigner
+    }
+}
+
+extension Decimal {
+    func rounded(decimal: Int) -> Decimal {
+        let poweredDecimal = self * pow(10, decimal)
+        let handler = NSDecimalNumberHandler(roundingMode: .plain, scale: 0, raiseOnExactness: false, raiseOnOverflow: false, raiseOnUnderflow: false, raiseOnDivideByZero: false)
+        return NSDecimalNumber(decimal: poweredDecimal).rounding(accordingToBehavior: handler).decimalValue / pow(10, decimal)
     }
 }

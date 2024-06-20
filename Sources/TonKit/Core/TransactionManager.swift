@@ -17,10 +17,11 @@ class TransactionManager {
 }
 
 extension TransactionManager {
-    func fullTransactionsPublisher(tagQueries: [TransactionTagQuery]) -> AnyPublisher<[FullTransaction], Never> {
+    func fullTransactionsPublisher(tagQueries: [TransactionTagQuery]?) -> AnyPublisher<[FullTransaction], Never> {
         fullTransactionsWithTagsSubject
             .map { transactionsWithTags in
-                transactionsWithTags.compactMap { (transaction: FullTransaction, tags: [TransactionTag]) -> FullTransaction? in
+                guard let tagQueries else { return transactionsWithTags.map { $0.transaction } }
+                return transactionsWithTags.compactMap { (transaction: FullTransaction, tags: [TransactionTag]) -> FullTransaction? in
                     for tagQuery in tagQueries {
                         for tag in tags {
                             if tag.conforms(tagQuery: tagQuery) {
@@ -47,12 +48,12 @@ extension TransactionManager {
         return storage.eventsBefore(tagQueries: tagQueries, lt: beforeLt, limit: limit)
     }
 
-    func newestEvent() -> AccountEventRecord? {
-        storage.lastEventRecord(newest: true)
+    func newestEvent(jettonAddressUid: String?) -> AccountEventRecord? {
+        storage.lastEventRecord(newest: true, jettonAddressUid: jettonAddressUid)
     }
 
-    func oldestEvent() -> AccountEventRecord? {
-        storage.lastEventRecord(newest: false)
+    func oldestEvent(jettonAddressUid: String?) -> AccountEventRecord? {
+        storage.lastEventRecord(newest: false, jettonAddressUid: jettonAddressUid)
     }
 
     func event(address _: Address, eventId: String) -> AccountEvent? {

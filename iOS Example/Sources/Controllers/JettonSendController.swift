@@ -11,22 +11,35 @@ class JettonSendController: UIViewController {
     private var estimatedFeeLimit: Int? = nil
     private var cancellables = Set<AnyCancellable>()
 
+    private let jettonLabel = UILabel()
     private let addressTextField = UITextField()
     private let amountTextField = UITextField()
     private let gasPriceLabel = UILabel()
     private let sendButton = UIButton()
+    
+    private var jetton: Jetton?
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
         title = "Send Jetton"
 
+        view.addSubview(jettonLabel)
+        jettonLabel.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.top.equalTo(view.safeAreaLayoutGuide).inset(16)
+        }
+
+        jettonLabel.font = .systemFont(ofSize: 14)
+        jettonLabel.textColor = .gray
+        jettonLabel.lineBreakMode = .byTruncatingMiddle
+        
         let addressLabel = UILabel()
 
         view.addSubview(addressLabel)
         addressLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(16)
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(16)
+            make.top.equalTo(jettonLabel.snp.bottom).offset(16)
         }
 
         addressLabel.font = .systemFont(ofSize: 14)
@@ -121,6 +134,9 @@ class JettonSendController: UIViewController {
         addressTextField.addTarget(self, action: #selector(updateEstimatedFee), for: .editingChanged)
         amountTextField.addTarget(self, action: #selector(updateEstimatedFee), for: .editingChanged)
 
+        jetton = adapter.jettons.first
+        jettonLabel.text = jetton?.address.toRaw()
+
         updateEstimatedFee()
     }
 
@@ -131,84 +147,57 @@ class JettonSendController: UIViewController {
     }
 
     @objc private func updateEstimatedFee() {
-//        guard let addressHex = addressTextField.text?.trimmingCharacters(in: .whitespaces),
-//              let valueText = amountTextField.text,
-//              let value = BigUInt(valueText),
-//              value > 0 else {
-//            return
-//        }
-//
-//        guard let address = try? Address.parse(raw: addressHex) else {
-//            return
-//        }
-//
-//        gasPriceLabel.text = "Loading..."
-//
-//        let contract = adapter.transferTrc20TriggerSmartContract(
-//            contractAddress: try! Address(address: Configuration.shared.defaultTrc20ContractAddress),
-//            toAddress: address,
-//            value: value
-//        )
-//
-//        Task { [weak self, adapter] in
-//            do {
-//                let fees = try await adapter.estimateFee(contract: contract)
-//
-//                self?.sendButton.isEnabled = value > 0
-//
-//                var feeStrings = [String]()
-//                for fee in fees {
-//                    let feeString: String
-//
-//                    switch fee {
-//                        case let .bandwidth(points, price): feeString = "\((Decimal(points * price) / 1_000_000).description)TRX (\(points) Bandwidth)"
-//
-//                        case let .energy(required, price):
-//                            feeString = "\((Decimal(required * price) / 1_000_000).description)TRX (\(required) Energy)"
-//                            self?.estimatedFeeLimit = required * price
-//
-//                        case let .accountActivation(amount): feeString = "\((Decimal(amount) / 1_000_000).description)TRX (Account Activation)"
-//                    }
-//
-//                    feeStrings.append(feeString)
-//                }
-//
-//                self?.gasPriceLabel.text = feeStrings.joined(separator: " | ")
-//            } catch {
-//                print(error)
-//            }
-//        }
+        guard let address = addressTextField.text?.trimmingCharacters(in: .whitespaces),
+              let valueText = amountTextField.text,
+              let value = Int(valueText),
+              value > 0
+        else {
+            return
+        }
+
+        gasPriceLabel.text = "Loading..."
+
+        Task { [weak self, adapter] in
+            do {
+                let fee = try await adapter.estimateFee(recipient: address, jetton: self?.jetton, amount: BigUInt(value), comment: "")
+
+                self?.sendButton.isEnabled = value > 0
+                self?.gasPriceLabel.text = fee.description
+            } catch {
+                print(error)
+                self?.gasPriceLabel.text = "Can't retrieve gas"
+            }
+        }
     }
 
     @objc private func send() {
-//        guard let addressHex = addressTextField.text?.trimmingCharacters(in: .whitespaces) else {
-//            return
-//        }
-//
-//        guard let address = try? Address(address: addressHex) else {
-//            show(error: "Invalid address")
-//            return
-//        }
-//
-//        guard let valueText = amountTextField.text, let value = BigUInt(valueText), value > 0 else {
-//            show(error: "Invalid amount")
-//            return
-//        }
-//
-//        let contract = adapter.transferTrc20TriggerSmartContract(
-//            contractAddress: try! Address(address: Configuration.shared.defaultTrc20ContractAddress),
-//            toAddress: address,
-//            value: value
-//        )
-//
-//        Task { [weak self, adapter, estimatedFeeLimit] in
-//            do {
-//                try await adapter.send(contract: contract, feeLimit: estimatedFeeLimit)
-//                self?.handleSuccess(address: address, amount: value)
-//            } catch {
-//                self?.show(error: "Send failed: \(error)")
-//            }
-//        }
+        guard let addressHex = addressTextField.text?.trimmingCharacters(in: .whitespaces) else {
+            return
+        }
+
+        
+        guard let validated = try? FriendlyAddress(string: addressHex) else {
+            show(error: "Invalid address")
+            return
+        }
+        
+        let address = validated.address.toString(bounceable: true)
+
+        guard let valueText = amountTextField.text, let value = BigUInt(valueText, radix: 10), value > 0 else {
+            show(error: "Invalid amount")
+            return
+        }
+
+        gasPriceLabel.text = "Sending..."
+
+        Task { [weak self, adapter] in
+            do {
+                try await adapter.send(recipient: address, jetton: self?.jetton, amount: value, comment: nil)
+                self?.handleSuccess(address: address, amount: value)
+            } catch {
+                self?.show(error: "Send failed: \(error)")
+            }
+        }
     }
 
     @MainActor
@@ -219,7 +208,7 @@ class JettonSendController: UIViewController {
     }
 
     @MainActor
-    private func handleSuccess(address: Address, amount: BigUInt) {
+    private func handleSuccess(address: String, amount: BigUInt) {
         addressTextField.text = ""
         amountTextField.text = ""
 

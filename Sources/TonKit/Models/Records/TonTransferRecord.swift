@@ -5,14 +5,16 @@ import TonSwift
 class TonTransferRecord: Record {
     let eventId: String
     let index: Int
+    let lt: Int64
     let senderUid: String
     let recipientUid: String
     let amount: Int64
     let comment: String?
 
-    init(eventId: String, index: Int, senderUid: String, recipientUid: String, amount: Int64, comment: String?) {
+    init(eventId: String, index: Int, lt: Int64, senderUid: String, recipientUid: String, amount: Int64, comment: String?) {
         self.eventId = eventId
         self.index = index
+        self.lt = lt
         self.senderUid = senderUid
         self.recipientUid = recipientUid
         self.amount = amount
@@ -28,6 +30,7 @@ class TonTransferRecord: Record {
     enum Columns: String, ColumnExpression {
         case eventId
         case index
+        case lt
         case senderUid
         case recipientUid
         case amount
@@ -37,6 +40,7 @@ class TonTransferRecord: Record {
     required init(row: Row) throws {
         eventId = row[Columns.eventId]
         index = row[Columns.index]
+        lt = row[Columns.lt]
         senderUid = row[Columns.senderUid]
         recipientUid = row[Columns.recipientUid]
         amount = row[Columns.amount]
@@ -48,6 +52,7 @@ class TonTransferRecord: Record {
     override func encode(to container: inout PersistenceContainer) {
         container[Columns.eventId] = eventId
         container[Columns.index] = index
+        container[Columns.lt] = lt
         container[Columns.senderUid] = senderUid
         container[Columns.recipientUid] = recipientUid
         container[Columns.amount] = amount
@@ -67,10 +72,11 @@ extension TonTransferRecord {
         )
     }
 
-    static func record(index: Int, _ from: TonTransfer) -> TonTransferRecord {
+    static func record(index: Int, lt: Int64, _ from: TonTransfer) -> TonTransferRecord {
         .init(
             eventId: from.eventId,
             index: index,
+            lt: lt,
             senderUid: from.sender.address.toRaw(),
             recipientUid: from.recipient.address.toRaw(),
             amount: from.amount,

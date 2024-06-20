@@ -20,6 +20,9 @@ extension Action {
         if let tonTransfer = action.TonTransfer {
             return try TonTransfer(eventId: eventId, index: index, action: tonTransfer)
         }
+        if let jettonTransfer = action.JettonTransfer {
+            return try JettonTransfer(eventId: eventId, index: index, action: jettonTransfer)
+        }
 
         throw MapError.unsupported
     }

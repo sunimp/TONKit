@@ -29,11 +29,14 @@ class TransactionCell: UITableViewCell {
         titlesLabel.numberOfLines = 0
         titlesLabel.font = .systemFont(ofSize: 12)
         titlesLabel.textColor = .gray
+        titlesLabel.setContentCompressionResistancePriority(.required, for: .horizontal)
+        titlesLabel.setContentHuggingPriority(.required, for: .horizontal)
 
         contentView.addSubview(valuesLabel)
         valuesLabel.snp.makeConstraints { make in
             make.top.equalTo(titlesLabel)
             make.trailing.equalToSuperview().inset(16)
+            make.leading.equalTo(titlesLabel.snp.trailing).offset(8)
         }
 
         valuesLabel.numberOfLines = 0

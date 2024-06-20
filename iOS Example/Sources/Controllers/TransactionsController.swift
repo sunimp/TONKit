@@ -62,7 +62,7 @@ class TransactionsController: UITableViewController {
     }
 
     override func tableView(_: UITableView, heightForRowAt _: IndexPath) -> CGFloat {
-        160
+        240
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

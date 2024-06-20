@@ -4,7 +4,7 @@ import GRDB
 import TonSwift
 
 protocol IActionRecord {
-    func save(db: Database, index: Int) throws
+    func save(db: Database, index: Int, lt: Int64) throws
 }
 
 public class Action: Codable {

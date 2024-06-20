@@ -3,6 +3,7 @@ import HdWalletKit
 import TonKit
 import TonSwift
 import TweetNacl
+import HsToolKit
 
 class Manager {
     static let shared = Manager()
@@ -22,12 +23,13 @@ class Manager {
     }
 
     private func initKit(type: Kit.WalletType, configuration: Configuration) throws {
+        let logger = Logger(minLogLevel: configuration.minLogLevel)
         let tonKit = try Kit.instance(
             type: type,
             network: configuration.network,
             walletId: "walletId",
             apiKey: nil,
-            minLogLevel: configuration.minLogLevel
+            logger: logger
         )
 
         adapter = TonAdapter(tonKit: tonKit)

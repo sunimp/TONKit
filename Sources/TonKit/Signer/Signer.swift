@@ -1,9 +1,20 @@
-import BigInt
+//
+//  Signer.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
-import HdWalletKit
-import HsCryptoKit
-import HsToolKit
+
+import BigInt
+import HDWalletKit
 import TonSwift
+import WWCryptoKit
+import WWExtensions
+import WWToolKit
+
+// MARK: - Signer
 
 public class Signer {
     private let privateKey: Data
@@ -17,23 +28,23 @@ public class Signer {
     }
 }
 
-public extension Signer {
-    static func instance(seed: Data) throws -> Signer {
+extension Signer {
+    public static func instance(seed: Data) throws -> Signer {
         try Signer(privateKey: privateKey(seed: seed))
     }
 
-    static func address(seed: Data) throws -> Address {
+    public static func address(seed: Data) throws -> Address {
         try address(privateKey: privateKey(seed: seed))
     }
 
-    static func address(privateKey _: Data) throws -> Address {
+    public static func address(privateKey _: Data) throws -> Address {
         fatalError()
 //        let publicKey = Data(Crypto.publicKey(privateKey: privateKey, compressed: false).dropFirst())
 //        return try Address(raw: [0x41] + Data(Crypto.sha3(publicKey).suffix(20)))
     }
 
-    static func privateKey(string: String) throws -> Data {
-        guard let data = string.hs.hexData else {
+    public static func privateKey(string: String) throws -> Data {
+        guard let data = string.ww.hexData else {
             throw PrivateKeyValidationError.invalidDataString
         }
 
@@ -44,14 +55,16 @@ public extension Signer {
         return data
     }
 
-    static func privateKey(seed: Data) throws -> Data {
+    public static func privateKey(seed: Data) throws -> Data {
         let hdWallet = HDWallet(seed: seed, coinType: 195, xPrivKey: HDExtendedKeyVersion.xprv.rawValue)
         return try hdWallet.privateKey(account: 0, index: 0, chain: .external).raw
     }
 }
 
-public extension Signer {
-    enum PrivateKeyValidationError: Error {
+// MARK: Signer.PrivateKeyValidationError
+
+extension Signer {
+    public enum PrivateKeyValidationError: Error {
         case invalidDataString
         case invalidDataLength
     }

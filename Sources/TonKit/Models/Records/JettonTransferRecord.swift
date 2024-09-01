@@ -1,7 +1,17 @@
+//
+//  JettonTransferRecord.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import GRDB
 import TonSwift
-import BigInt
+
+// MARK: - JettonTransferRecord
 
 class JettonTransferRecord: Record {
     let eventId: String
@@ -15,7 +25,18 @@ class JettonTransferRecord: Record {
     let jettonAddressUid: String
     let comment: String?
 
-    init(eventId: String, index: Int, lt: Int64, senderUid: String?, recipientUid: String?, senderAddressUid: String, recipientAddressUid: String, amount: BigUInt, jettonAddressUid: String, comment: String?) {
+    init(
+        eventId: String,
+        index: Int,
+        lt: Int64,
+        senderUid: String?,
+        recipientUid: String?,
+        senderAddressUid: String,
+        recipientAddressUid: String,
+        amount: BigUInt,
+        jettonAddressUid: String,
+        comment: String?
+    ) {
         self.eventId = eventId
         self.index = index
         self.lt = lt
@@ -83,9 +104,11 @@ class JettonTransferRecord: Record {
 
 extension JettonTransferRecord {
     func jettonTransfer(sender: WalletAccount?, recipient: WalletAccount?) -> JettonTransfer? {
-        guard let senderAddress = try? Address.parse(raw: senderAddressUid),
-              let recipientAddress = try? Address.parse(raw: recipientAddressUid),
-              let jettonAddress = try? Address.parse(raw: jettonAddressUid) else {
+        guard
+            let senderAddress = try? Address.parse(raw: senderAddressUid),
+            let recipientAddress = try? Address.parse(raw: recipientAddressUid),
+            let jettonAddress = try? Address.parse(raw: jettonAddressUid)
+        else {
             return nil
         }
         

@@ -1,3 +1,12 @@
+//
+//  InitialSyncCompleted.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import GRDB
 
 class InitialSyncCompleted: Record {

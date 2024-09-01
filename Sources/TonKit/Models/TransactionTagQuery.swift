@@ -1,3 +1,12 @@
+//
+//  TransactionTagQuery.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import TonSwift
 
 public class TransactionTagQuery {
@@ -6,7 +15,12 @@ public class TransactionTagQuery {
     public let jettonAddress: Address?
     public let address: String?
 
-    public init(type: TransactionTag.TagType? = nil, protocol: TransactionTag.TagProtocol? = nil, jettonAddress: Address? = nil, address: String?) {
+    public init(
+        type: TransactionTag.TagType? = nil,
+        protocol: TransactionTag.TagProtocol? = nil,
+        jettonAddress: Address? = nil,
+        address: String?
+    ) {
         self.type = type
         self.protocol = `protocol`
         self.jettonAddress = jettonAddress

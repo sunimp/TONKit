@@ -1,15 +1,27 @@
-import BigInt
+//
+//  TonApi.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import OpenAPIRuntime
 import TonAPI
+import TonStreamingAPI
 import TonSwift
 
+// MARK: - TonApi
+
 struct TonApi {
-    private let tonAPIClient: TonAPI.Client
+    
+    private let tonAPIClient: TonStreamingAPI.Client
     private let urlSession: URLSession
     let url: URL
 
-    init(tonAPIClient: TonAPI.Client, urlSession: URLSession, url: URL) {
+    init(tonAPIClient: TonStreamingAPI.Client, urlSession: URLSession, url: URL) {
         self.tonAPIClient = tonAPIClient
         self.urlSession = urlSession
         self.url = url
@@ -19,21 +31,19 @@ struct TonApi {
 // MARK: - Account
 
 extension TonApi {
+    
     func getAccountInfo(address: Address) async throws -> Account {
-        let response = try await tonAPIClient
-            .getAccount(.init(path: .init(account_id: address.toRaw())))
-        return try Account(account: response.ok.body.json)
+        let response = try await AccountsAPI.getAccount(accountId: address.toRaw())
+        return try Account(account: response)
     }
 
     func getAccountJettonsBalances(address: Address, currencies: [String]) async throws -> [JettonBalance] {
-        let currenciesString = currencies.joined(separator: ",")
-        let response = try await tonAPIClient
-            .getAccountJettonsBalances(path: .init(account_id: address.toRaw()), query: .init(currencies: currenciesString))
-        return try response.ok.body.json.balances
+        let response = try await AccountsAPI.getAccountJettonsBalances(accountId: address.toRaw(), currencies: currencies)
+        return response.balances
             .compactMap { jetton in
                 do {
                     let quantity = BigUInt(stringLiteral: jetton.balance)
-                    let walletAddress = try Address.parse(jetton.wallet_address.address)
+                    let walletAddress = try Address.parse(jetton.walletAddress.address)
                     let jettonInfo = try JettonInfo(jettonPreview: jetton.jetton)
                     let jettonItem = JettonItem(jettonInfo: jettonInfo, walletAddress: walletAddress)
                     let jettonBalance = JettonBalance(item: jettonItem, quantity: quantity)
@@ -48,85 +58,91 @@ extension TonApi {
 //// MARK: - Events
 
 extension TonApi {
-    func getAccountEvents(address: Address,
-                          beforeLt: Int64?,
-                          limit: Int, 
-                          start: Int64? = nil,
-                          end: Int64? = nil) async throws -> AccountEvents
-    {
-        let response = try await tonAPIClient.getAccountEvents(
-            path: .init(account_id: address.toRaw()),
-            query: .init(before_lt: beforeLt,
-                         limit: limit,
-                         start_date: start,
-                         end_date: end)
+    
+    func getAccountEvents(
+        address: Address,
+        beforeLt: Int64?,
+        limit: Int,
+        start: Int64? = nil,
+        end: Int64? = nil
+    ) async throws -> AccountEvents {
+        let response = try await AccountsAPI.getAccountEvents(
+            accountId: address.toRaw(),
+            limit: limit,
+            beforeLt: beforeLt,
+            startDate: start,
+            endDate: end
         )
-        let entity = try response.ok.body.json
-        let events: [AccountEvent] = entity.events.compactMap {
+        let events: [AccountEvent] = response.events.compactMap {
             guard let activityEvent = try? AccountEvent(accountEvent: $0) else { return nil }
             return activityEvent
         }
-        return AccountEvents(address: address,
-                             events: events,
-                             startFrom: beforeLt ?? 0,
-                             nextFrom: entity.next_from)
+        return AccountEvents(
+            address: address,
+            events: events,
+            startFrom: beforeLt ?? 0,
+            nextFrom: response.nextFrom
+        )
     }
 
-    func getAccountJettonEvents(address: Address,
-                                jettonInfo: JettonInfo,
-                                beforeLt: Int64?,
-                                limit: Int, 
-                                start: Int64? = nil,
-                                end: Int64? = nil) async throws -> AccountEvents
-    {
-        let response = try await tonAPIClient.getAccountJettonHistoryByID(
-            path: .init(account_id: address.toRaw(),
-                        jetton_id: jettonInfo.address.toRaw()),
-            query: .init(before_lt: beforeLt,
-                         limit: limit,
-                         start_date: start,
-                         end_date: end)
+    func getAccountJettonEvents(
+        address: Address,
+        jettonInfo: JettonInfo,
+        beforeLt: Int64?,
+        limit: Int,
+        start: Int64? = nil,
+        end: Int64? = nil
+    ) async throws -> AccountEvents {
+        let response = try await AccountsAPI.getAccountJettonHistoryByID(
+            accountId: address.toRaw(),
+            jettonId: jettonInfo.address.toRaw(),
+            limit: limit,
+            beforeLt: beforeLt,
+            startDate: start,
+            endDate: end
         )
-        let entity = try response.ok.body.json
-        let events: [AccountEvent] = entity.events.compactMap {
+        let events: [AccountEvent] = response.events.compactMap {
             guard let activityEvent = try? AccountEvent(accountEvent: $0) else { return nil }
             return activityEvent
         }
-        return AccountEvents(address: address,
-                             events: events,
-                             startFrom: beforeLt ?? 0,
-                             nextFrom: entity.next_from)
+        return AccountEvents(
+            address: address,
+            events: events,
+            startFrom: beforeLt ?? 0,
+            nextFrom: response.nextFrom
+        )
     }
 
-    func getEvent(address: Address,
-                  eventId: String) async throws -> AccountEvent
-    {
-        let response = try await tonAPIClient
-            .getAccountEvent(path: .init(account_id: address.toRaw(),
-                                         event_id: eventId))
-        return try AccountEvent(accountEvent: response.ok.body.json)
+    func getEvent(
+        address: Address,
+        eventId: String
+    ) async throws -> AccountEvent {
+        let response = try await AccountsAPI.getAccountEvent(
+            accountId: address.toRaw(),
+            eventId: eventId
+        )
+        return try AccountEvent(accountEvent: response)
     }
 }
 
 // MARK: - Wallet
 
 extension TonApi {
+    
     func getSeqno(address: Address) async throws -> Int {
-        let response = try await tonAPIClient
-            .getAccountSeqno(path: .init(account_id: address.toRaw()))
-        return try response.ok.body.json.seqno
+        try await WalletAPI.getAccountSeqno(accountId: address.toRaw()).seqno
     }
 
-    func emulateMessageWallet(boc: String) async throws -> Components.Schemas.MessageConsequences {
-        let response = try await tonAPIClient
-            .emulateMessageToWallet(body: .json(.init(boc: boc)))
-        return try response.ok.body.json
+    func emulateMessageWallet(boc: String) async throws -> TonAPI.MessageConsequences {
+        try await EmulationAPI.emulateMessageToWallet(
+            emulateMessageToWalletRequest: .init(boc: boc)
+        )
     }
 
     func sendTransaction(boc: String) async throws {
-        let response = try await tonAPIClient
-            .sendBlockchainMessage(body: .json(.init(boc: boc)))
-        _ = try response.ok
+        try await BlockchainAPI.sendBlockchainMessage(
+            sendBlockchainMessageRequest: .init(boc: boc)
+        )
     }
 }
 
@@ -171,19 +187,15 @@ extension TonApi {
 // MARK: - Jettons
 
 extension TonApi {
+    
     func resolveJetton(address: Address) async throws -> JettonInfo {
-        let response = try await tonAPIClient.getJettonInfo(
-            Operations.getJettonInfo.Input(
-                path: Operations.getJettonInfo.Input.Path(
-                    account_id: address.toRaw()
-                )
-            )
-        )
-        let entity = try response.ok.body.json
+        let response = try await JettonsAPI.getJettonInfo(accountId: address.toRaw())
         let verification: JettonInfo.Verification
-        switch entity.verification {
-        case .none:
+        switch response.verification {
+        case ._none:
             verification = .none
+        case .unknownDefaultOpenApi:
+            verification = .unknown
         case .blacklist:
             verification = .blacklist
         case .whitelist:
@@ -191,12 +203,12 @@ extension TonApi {
         }
 
         return try JettonInfo(
-            address: Address.parse(entity.metadata.address),
-            fractionDigits: Int(entity.metadata.decimals) ?? 0,
-            name: entity.metadata.name,
-            symbol: entity.metadata.symbol,
+            address: Address.parse(response.metadata.address),
+            fractionDigits: Int(response.metadata.decimals) ?? 0,
+            name: response.metadata.name,
+            symbol: response.metadata.symbol,
             verification: verification,
-            imageURL: URL(string: entity.metadata.image ?? "")
+            imageURL: URL(string: response.metadata.image ?? "")
         )
     }
 }
@@ -237,10 +249,10 @@ extension TonApi {
 // MARK: - Time
 
 extension TonApi {
+    
     func time() async throws -> TimeInterval {
-        let response = try await tonAPIClient.getRawTime(Operations.getRawTime.Input())
-        let entity = try response.ok.body.json
-        return TimeInterval(entity.time)
+        let response = try await LiteServerAPI.getRawTime()
+        return TimeInterval(response.time)
     }
 
     func timeoutSafely(TTL: UInt64 = 5 * 60) async -> UInt64 {

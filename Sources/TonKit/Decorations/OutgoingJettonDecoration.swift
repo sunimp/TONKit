@@ -1,5 +1,16 @@
+//
+//  OutgoingJettonDecoration.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import BigInt
 import TonSwift
+
+// MARK: - OutgoingJettonDecoration
 
 public class OutgoingJettonDecoration: TransactionDecoration {
     public let address: Address
@@ -27,18 +38,20 @@ public class OutgoingJettonDecoration: TransactionDecoration {
         let amount = IncomingJettonDecoration.incomingAmount(address: address, transfers: transfers)
         guard amount <= 0 else { return nil }
 
-        guard let first = transfers.first(where: {
-            guard let sender = $0.sender else { return false }
-            return sender.address == address
-        }), let recipient = first.recipient else { return nil }
+        guard
+            let first = transfers.first(where: {
+                guard let sender = $0.sender else { return false }
+                return sender.address == address
+            }), let recipient = first.recipient
+        else { return nil }
 
         
         self.address = address
-        self.to = recipient.address
-        self.jettonAddress = first.jettonAddress
-        self.value = BigUInt(abs(amount))
-        self.comment = first.comment
-        self.sentToSelf = recipient.address == address
+        to = recipient.address
+        jettonAddress = first.jettonAddress
+        value = BigUInt(abs(amount))
+        comment = first.comment
+        sentToSelf = recipient.address == address
         super.init(address: address, actions: actions)
     }
 
@@ -54,6 +67,8 @@ public class OutgoingJettonDecoration: TransactionDecoration {
         return tags
     }
 }
+
+// MARK: CustomStringConvertible
 
 extension OutgoingJettonDecoration: CustomStringConvertible {
     public var description: String {

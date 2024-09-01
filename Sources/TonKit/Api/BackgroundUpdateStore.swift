@@ -1,9 +1,19 @@
-import EventSource
+//
+//  BackgroundUpdateStore.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
-import HsToolKit
+
+import EventSource
 import OpenAPIRuntime
 import TonStreamingAPI
 import TonSwift
+import WWToolKit
+
+// MARK: - BackgroundUpdateState
 
 public enum BackgroundUpdateState {
     case connecting(addresses: [Address])
@@ -12,11 +22,15 @@ public enum BackgroundUpdateState {
     case noConnection
 }
 
+// MARK: - BackgroundUpdateEvent
+
 public struct BackgroundUpdateEvent {
     public let accountAddress: Address
     public let lt: Int64
     public let txHash: String
 }
+
+// MARK: - BackgroundUpdateStore
 
 public actor BackgroundUpdateStore {
     typealias ObservationClosure = (Event) -> Void
@@ -27,7 +41,7 @@ public actor BackgroundUpdateStore {
 
     public var state: BackgroundUpdateState = .disconnected {
         didSet {
-            observations.values.forEach { $0(.didUpdateState(state)) }
+            for value in observations.values { value(.didUpdateState(state)) }
         }
     }
 
@@ -44,14 +58,17 @@ public actor BackgroundUpdateStore {
 
     public func start(addresses: [Address]) async {
         switch state {
-        case let .connecting(connectingAddresses):
+        case .connecting(let connectingAddresses):
             guard addresses != connectingAddresses else { return }
             connect(addresses: addresses)
-        case let .connected(connectedAddresses):
+
+        case .connected(let connectedAddresses):
             guard addresses != connectedAddresses else { return }
             connect(addresses: addresses)
+
         case .disconnected:
             connect(addresses: addresses)
+
         case .noConnection:
             connect(addresses: addresses)
         }
@@ -65,9 +82,10 @@ public actor BackgroundUpdateStore {
 
     private var observations = [UUID: ObservationClosure]()
 
-    func addEventObserver<T: AnyObject>(_ observer: T,
-                                        closure: @escaping (T, Event) -> Void) -> ObservationToken
-    {
+    func addEventObserver<T: AnyObject>(
+        _ observer: T,
+        closure: @escaping (T, Event) -> Void
+    ) -> ObservationToken {
         let id = UUID()
         let eventHandler: (Event) -> Void = { [weak self, weak observer] event in
             guard let self else { return }
@@ -91,8 +109,8 @@ public actor BackgroundUpdateStore {
     }
 }
 
-private extension BackgroundUpdateStore {
-    func connect(addresses: [Address]) {
+extension BackgroundUpdateStore {
+    fileprivate func connect(addresses: [Address]) {
         self.task?.cancel()
         self.task = nil
 
@@ -130,10 +148,11 @@ private extension BackgroundUpdateStore {
         self.task = task
     }
 
-    func handleReceivedEvents(_ events: [EventSource.Event]) {
+    fileprivate func handleReceivedEvents(_ events: [EventSource.Event]) {
         logger?.log(level: .debug, message: "-> receive events :\(events.count)")
-        guard let messageEvent = events.last(where: { $0.event == "message" }),
-              let eventData = messageEvent.data?.data(using: .utf8)
+        guard
+            let messageEvent = events.last(where: { $0.event == "message" }),
+            let eventData = messageEvent.data?.data(using: .utf8)
         else {
             return
         }
@@ -145,15 +164,15 @@ private extension BackgroundUpdateStore {
                 lt: eventTransaction.lt,
                 txHash: eventTransaction.txHash
             )
-            observations.values.forEach { $0(.didReceiveUpdateEvent(updateEvent)) }
+            for value in observations.values { value(.didReceiveUpdateEvent(updateEvent)) }
         } catch {
             return
         }
     }
 }
 
-public extension Swift.Error {
-    var isNoConnectionError: Bool {
+extension Swift.Error {
+    public var isNoConnectionError: Bool {
         switch self {
         case let urlError as URLError:
             switch urlError.code {
@@ -162,14 +181,16 @@ public extension Swift.Error {
                 return true
             default: return false
             }
+
         case let clientError as OpenAPIRuntime.ClientError:
             return clientError.underlyingError.isNoConnectionError
+
         default:
             return false
         }
     }
 
-    var isCancelledError: Bool {
+    public var isCancelledError: Bool {
         switch self {
         case let urlError as URLError:
             switch urlError.code {
@@ -177,13 +198,17 @@ public extension Swift.Error {
                 return true
             default: return false
             }
+
         case let clientError as OpenAPIRuntime.ClientError:
             return clientError.underlyingError.isCancelledError
+
         default:
             return false
         }
     }
 }
+
+// MARK: - ObservationToken
 
 public class ObservationToken {
     private let cancellationClosure: () -> Void

@@ -1,12 +1,24 @@
-import BigInt
+//
+//  TransactionBoc.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import TonSwift
+
+// MARK: - TransactionBoc
 
 class TransactionBoc {
     func create() async throws -> String {
         fatalError("must be implemented by childs")
     }
 }
+
+// MARK: - TransferData
 
 struct TransferData {
     let contract: WalletContract
@@ -21,6 +33,8 @@ struct TransferData {
     let signClosure: (WalletTransfer) async throws -> Data
 }
 
+// MARK: - TransferBoc
+
 class TransferBoc: TransactionBoc {
     let data: TransferData
 
@@ -28,6 +42,8 @@ class TransferBoc: TransactionBoc {
         data = transferData
     }
 }
+
+// MARK: - TonTransferBoc
 
 class TonTransferBoc: TransferBoc {
     override init(transferData: TransferData) {
@@ -49,6 +65,8 @@ class TonTransferBoc: TransferBoc {
         )
     }
 }
+
+// MARK: - JettonTransferBoc
 
 class JettonTransferBoc: TransferBoc {
     let jetton: Address

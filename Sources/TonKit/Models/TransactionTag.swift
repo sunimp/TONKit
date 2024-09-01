@@ -1,5 +1,16 @@
+//
+//  TransactionTag.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import GRDB
 import TonSwift
+
+// MARK: - TransactionTag
 
 public class TransactionTag {
     public let type: TagType
@@ -35,6 +46,8 @@ public class TransactionTag {
     }
 }
 
+// MARK: Hashable
+
 extension TransactionTag: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(type)
@@ -44,12 +57,13 @@ extension TransactionTag: Hashable {
     }
 
     public static func == (lhs: TransactionTag, rhs: TransactionTag) -> Bool {
-        lhs.type == rhs.type && lhs.protocol == rhs.protocol && lhs.jettonAddress == rhs.jettonAddress && lhs.addresses == rhs.addresses
+        lhs.type == rhs.type && lhs.protocol == rhs.protocol && lhs.jettonAddress == rhs.jettonAddress && lhs.addresses == rhs
+            .addresses
     }
 }
 
-public extension TransactionTag {
-    enum TagProtocol: String, DatabaseValueConvertible {
+extension TransactionTag {
+    public enum TagProtocol: String, DatabaseValueConvertible {
         case native
         case jetton
 
@@ -59,7 +73,7 @@ public extension TransactionTag {
 
         public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> TagProtocol? {
             switch dbValue.storage {
-            case let .string(string):
+            case .string(let string):
                 return TagProtocol(rawValue: string)
             default:
                 return nil
@@ -67,7 +81,7 @@ public extension TransactionTag {
         }
     }
 
-    enum TagType: String, DatabaseValueConvertible {
+    public enum TagType: String, DatabaseValueConvertible {
         case incoming
         case outgoing
         case approve
@@ -80,7 +94,7 @@ public extension TransactionTag {
 
         public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> TagType? {
             switch dbValue.storage {
-            case let .string(string):
+            case .string(let string):
                 return TagType(rawValue: string)
             default:
                 return nil

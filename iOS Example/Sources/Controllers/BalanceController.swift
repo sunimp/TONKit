@@ -1,8 +1,17 @@
+//
+//  WordsController.swift
+//  TonKit-Demo
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Combine
+import UIKit
+
 import SnapKit
 import TonKit
 import TonSwift
-import UIKit
+import UIExtensions
 
 class BalanceController: UIViewController {
     private let adapter: TonAdapter = Manager.shared.adapter
@@ -77,7 +86,7 @@ class BalanceController: UIViewController {
     @objc func logout() {
         Manager.shared.logout()
 
-        if let window = UIApplication.shared.keyWindow {
+        if let window = UIWindow.keyWindow {
             UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
                 window.rootViewController = UINavigationController(rootViewController: WordsController())
             })

@@ -1,8 +1,15 @@
+//
+//  BalanceCell.swift
+//  TonKit-Demo
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import UIKit
+
 import BigInt
-import Foundation
 import SnapKit
 import TonKit
-import UIKit
 
 class BalanceCell: UITableViewCell {
     private let titleLabel = UILabel()

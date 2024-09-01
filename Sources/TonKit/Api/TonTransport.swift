@@ -1,11 +1,19 @@
+//
+//  TonTransport.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import StreamURLSessionTransport
 import TonAPI
 
 struct TonTransport {
     lazy var transport: StreamURLSessionTransport = .init(urlSessionConfiguration: urlSessionConfiguration)
 
-    lazy var streamingTransport: StreamURLSessionTransport = .init(urlSessionConfiguration: streamingUrlSessionConfiguration)
+    lazy var streamingTransport: StreamURLSessionTransport = .init(urlSessionConfiguration: streamingURLSessionConfiguration)
 
     var urlSessionConfiguration: URLSessionConfiguration {
         let configuration = URLSessionConfiguration.default
@@ -14,7 +22,7 @@ struct TonTransport {
         return configuration
     }
 
-    var streamingUrlSessionConfiguration: URLSessionConfiguration {
+    var streamingURLSessionConfiguration: URLSessionConfiguration {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = TimeInterval(Int.max)
         configuration.timeoutIntervalForResource = TimeInterval(Int.max)

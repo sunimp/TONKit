@@ -1,15 +1,24 @@
+//
+//  WalletAccount.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import TonAPI
 import TonSwift
 
 extension WalletAccount {
-    init(accountAddress: Components.Schemas.AccountAddress) throws {
+    
+    init(accountAddress: TonAPI.AccountAddress) throws {
         let address = try TonSwift.Address.parse(accountAddress.address)
         self.init(
             address: address,
             name: accountAddress.name,
-            isScam: accountAddress.is_scam,
-            isWallet: accountAddress.is_wallet
+            isScam: accountAddress.isScam,
+            isWallet: accountAddress.isWallet
         )
     }
 }

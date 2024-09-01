@@ -1,9 +1,17 @@
+//
+//  Manager.swift
+//  TonKit-Demo
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
-import HdWalletKit
+
+import HDWalletKit
 import TonKit
 import TonSwift
 import TweetNacl
-import HsToolKit
+import WWToolKit
 
 class Manager {
     static let shared = Manager()

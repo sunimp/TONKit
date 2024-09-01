@@ -1,6 +1,16 @@
-import BigInt
+//
+//  DecorationManager.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import TonSwift
+
+// MARK: - DecorationManager
 
 class DecorationManager {
     private let userAddress: Address

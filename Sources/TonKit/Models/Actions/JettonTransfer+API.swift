@@ -1,14 +1,22 @@
+//
+//  JettonTransfer.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import TonAPI
 import TonSwift
-import BigInt
 
 extension JettonTransfer {
-    convenience init(eventId: String, index: Int, action: Components.Schemas.JettonTransferAction) throws {
+    convenience init(eventId: String, index: Int, action: JettonTransferAction) throws {
         let sender = try? action.sender.map { try WalletAccount(accountAddress: $0) }
         let recipient = try? action.recipient.map { try WalletAccount(accountAddress: $0) }
-        let senderAddress = try Address.parse(action.senders_wallet)
-        let recipientAddress = try Address.parse(action.recipients_wallet)
+        let senderAddress = try Address.parse(action.sendersWallet)
+        let recipientAddress = try Address.parse(action.recipientsWallet)
         let jettonAddress = try Address.parse(action.jetton.address)
         guard let amount = BigUInt(action.amount, radix: 10) else {
             throw Kit.KitError.parsingError

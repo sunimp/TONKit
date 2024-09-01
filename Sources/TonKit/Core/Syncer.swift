@@ -1,8 +1,18 @@
-import Foundation
-import HsExtensions
-import TonSwift
-import HsToolKit
+//
+//  Syncer.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Combine
+import Foundation
+
+import TonSwift
+import WWExtensions
+import WWToolKit
+
+// MARK: - Syncer
 
 class Syncer {
     private static let avoidDoubleSyncInterval: TimeInterval = 3
@@ -25,12 +35,14 @@ class Syncer {
     private var logger: Logger?
     
     private var lastSynced: TimeInterval = 0
-    private var syncing: Bool = false
+    private var syncing = false
 
     
-    @Published public var updateState: String = "Idle"
+    @Published
+    public var updateState = "Idle"
 
-    @DistinctPublished private(set) var state: SyncState = .notSynced(error: Kit.SyncError.notStarted)
+    @DistinctPublished
+    private(set) var state: SyncState = .notSynced(error: Kit.SyncError.notStarted)
 
     deinit {
         backgroundUpdateStoreObservationToken?.cancel()
@@ -39,14 +51,16 @@ class Syncer {
         }
     }
 
-    init(accountInfoManager: AccountInfoManager,
-         transactionManager: TransactionManager,
-         reachabilityManager: ReachabilityManager,
-         api: TonApi,
-         backgroundUpdateStore: BackgroundUpdateStore,
-         storage: SyncerStorage,
-         address: Address,
-         logger: Logger?) {
+    init(
+        accountInfoManager: AccountInfoManager,
+        transactionManager: TransactionManager,
+        reachabilityManager: ReachabilityManager,
+        api: TonApi,
+        backgroundUpdateStore: BackgroundUpdateStore,
+        storage: SyncerStorage,
+        address: Address,
+        logger: Logger?
+    ) {
         self.accountInfoManager = accountInfoManager
         self.transactionManager = transactionManager
         self.reachabilityManager = reachabilityManager
@@ -67,7 +81,7 @@ class Syncer {
         logger?.log(level: .debug, message: "Handle reachable \(isReachable)")
         if isReachable {
             Task { [weak self] in
-               await self?.startBackgroundUpdate()
+                await self?.startBackgroundUpdate()
             }
         }
     }
@@ -89,26 +103,30 @@ extension Syncer {
     private func subscribeUpdates() async {
         _ = await backgroundUpdateStore.addEventObserver(self) { [weak self] observer, state in
             switch state {
-            case let .didUpdateState(backgroundUpdateState):
+            case .didUpdateState(let backgroundUpdateState):
                 switch backgroundUpdateState {
                 case .connected:
                     Task { [weak self] in
                         self?.logger?.log(level: .debug, message: "Try Update from connected background Update")
                         await observer.update(forced: false)
                     }
+
                 case .noConnection:
                     Task { [weak self] in
                         self?.logger?.log(level: .error, message: "Stream has no connection")
                         self?.set(state: .notSynced(error: Kit.SyncError.noNetworkConnection))
                     }
+
                 case .disconnected:
                     Task { [weak self] in
                         self?.logger?.log(level: .error, message: "Strean has disconnected")
                         self?.set(state: .notSynced(error: Kit.SyncError.disconnected))
                     }
+
                 default: break
                 }
-            case let .didReceiveUpdateEvent(backgroundUpdateEvent):
+
+            case .didReceiveUpdateEvent(let backgroundUpdateEvent):
                 Task { [weak self] in
                     guard backgroundUpdateEvent.accountAddress == self?.address else { return }
                     self?.logger?.log(level: .debug, message: "Try Update from event background Update")
@@ -165,6 +183,8 @@ extension Syncer {
     }
 }
 
+// MARK: ISyncTimerDelegate
+
 extension Syncer: ISyncTimerDelegate {
     private func checkNewTransactions(before: AccountEventRecord, jettonInfo: JettonInfo? = nil) async throws {
         var completed = false
@@ -173,9 +193,20 @@ extension Syncer: ISyncTimerDelegate {
         repeat {
             let newActions: AccountEvents
             if let jettonInfo {
-                newActions = try await api.getAccountJettonEvents(address: address, jettonInfo: jettonInfo, beforeLt: nil, limit: Syncer.limitCount, start: startTime + 1)
+                newActions = try await api.getAccountJettonEvents(
+                    address: address,
+                    jettonInfo: jettonInfo,
+                    beforeLt: nil,
+                    limit: Syncer.limitCount,
+                    start: startTime + 1
+                )
             } else {
-                newActions = try await api.getAccountEvents(address: address, beforeLt: nil, limit: Syncer.limitCount, start: startTime + 1)
+                newActions = try await api.getAccountEvents(
+                    address: address,
+                    beforeLt: nil,
+                    limit: Syncer.limitCount,
+                    start: startTime + 1
+                )
             }
             
             logger?.log(level: .debug, message: "==> Get new actions: \(newActions.events.count)")
@@ -204,7 +235,8 @@ extension Syncer: ISyncTimerDelegate {
         case .ready:
             set(state: .syncing(progress: nil))
             sync()
-        case let .notReady(error):
+
+        case .notReady(let error):
             tasks = Set()
             set(state: .notSynced(error: error))
         }
@@ -221,7 +253,11 @@ extension Syncer: ISyncTimerDelegate {
     private func getTransactions(jettonInfo: JettonInfo? = nil) async throws {
         logger?.log(level: .debug, message: "==> Get History for: \(jettonInfo?.address.toRaw() ?? "TON")")
 
-        if let newest = transactionManager.newestEvent(jettonAddressUid: jettonInfo?.address.toRaw()) { // todo: implement related on jettonAddress or tonAddress
+        if
+            let newest = transactionManager
+                .newestEvent(jettonAddressUid: jettonInfo?.address.toRaw())
+        {
+            // todo: implement related on jettonAddress or tonAddress
             logger?.log(level: .debug, message: "=> has newest: lt = \(newest.lt) | timestamp = \(newest.timestamp.description)")
 //             2. If we has last -> get all new transaction from now to last timestamp.
             logger?.log(level: .debug, message: "=> Try to check new txs:")
@@ -251,7 +287,12 @@ extension Syncer: ISyncTimerDelegate {
 
             var fetchResult: AccountEvents
             if let jettonInfo {
-                fetchResult = try await api.getAccountJettonEvents(address: address, jettonInfo: jettonInfo, beforeLt: beforeLt, limit: Syncer.limitCount)
+                fetchResult = try await api.getAccountJettonEvents(
+                    address: address,
+                    jettonInfo: jettonInfo,
+                    beforeLt: beforeLt,
+                    limit: Syncer.limitCount
+                )
             } else {
                 fetchResult = try await api.getAccountEvents(address: address, beforeLt: beforeLt, limit: Syncer.limitCount)
             }
@@ -266,7 +307,7 @@ extension Syncer: ISyncTimerDelegate {
 
             beforeLt = fetchResult.nextFrom
 
-            if fetchResult.events.count == 0 {
+            if fetchResult.events.isEmpty {
                 let id = jettonInfo.map { Kit.jettonId(address: $0.address.toRaw()) } ?? Kit.tonId
                 storage.save(api: api.url.absoluteString, id: id, initialSyncCompleted: true)
                 logger?.log(level: .debug, message: "Full sync Completed")
@@ -286,7 +327,6 @@ extension Syncer: ISyncTimerDelegate {
 
         Task { [weak self, api, address, accountInfoManager] in
             do {
-
                 // 0. Get balance
                 self?.logger?.log(level: .debug, message: "-> Try get balance")
                 let account = try await api.getAccountInfo(address: address)
@@ -298,7 +338,10 @@ extension Syncer: ISyncTimerDelegate {
                 let balances = try await api.getAccountJettonsBalances(address: address, currencies: ["ton"])
                 self?.logger?.log(level: .debug, message: "-> Got Jetton Balances :")
                 for balance in balances {
-                    self?.logger?.log(level: .debug, message: "-> \(balance.item.jettonInfo.address.toRaw()) : \(balance.quantity.description)")
+                    self?.logger?.log(
+                        level: .debug,
+                        message: "-> \(balance.item.jettonInfo.address.toRaw()) : \(balance.quantity.description)"
+                    )
                 }
                 accountInfoManager.handle(jettonBalances: balances)
                 

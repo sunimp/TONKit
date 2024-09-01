@@ -1,7 +1,17 @@
+//
+//  AccountRecord.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import GRDB
 import TonAPI
 import TonSwift
+
+// MARK: - AccountRecord
 
 class AccountRecord: Record {
     let uid: Data

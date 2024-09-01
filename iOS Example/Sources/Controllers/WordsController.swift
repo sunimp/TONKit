@@ -1,8 +1,17 @@
-import HdWalletKit
+//
+//  WordsController.swift
+//  TonKit-Demo
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import UIKit
+
+import HDWalletKit
 import SnapKit
 import TonKit
 import TonSwift
-import UIKit
+import UIExtensions
 
 class WordsController: UIViewController {
     private let textView = UITextView()
@@ -141,7 +150,7 @@ class WordsController: UIViewController {
 
             try Manager.shared.login(words: words)
 
-            if let window = UIApplication.shared.keyWindow {
+            if let window = UIWindow.keyWindow {
                 UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
                     window.rootViewController = MainController()
                 })
@@ -161,7 +170,7 @@ class WordsController: UIViewController {
 
             try Manager.shared.watch(address: address.address)
 
-            if let window = UIApplication.shared.keyWindow {
+            if let window = UIWindow.keyWindow {
                 UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
                     window.rootViewController = MainController()
                 })

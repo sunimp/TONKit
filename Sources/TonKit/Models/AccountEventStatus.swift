@@ -1,4 +1,12 @@
+//
+//  AccountEventStatus.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import GRDB
 
 enum AccountEventStatus: Codable, DatabaseValueConvertible {
@@ -10,7 +18,7 @@ enum AccountEventStatus: Codable, DatabaseValueConvertible {
         switch self {
         case .ok: return nil
         case .failed: return "Failed"
-        case let .unknown(value):
+        case .unknown(let value):
             return value
         }
     }

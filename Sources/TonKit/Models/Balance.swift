@@ -1,5 +1,16 @@
+//
+//  Balance.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import BigInt
 import GRDB
+
+// MARK: - Balance
 
 class Balance: Record {
     let id: String
@@ -39,13 +50,15 @@ class Balance: Record {
     }
 }
 
+// MARK: - BigUInt + DatabaseValueConvertible
+
 extension BigUInt: DatabaseValueConvertible {
     public var databaseValue: DatabaseValue {
         description.databaseValue
     }
 
     public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> BigUInt? {
-        if case let DatabaseValue.Storage.string(value) = dbValue.storage {
+        if case DatabaseValue.Storage.string(let value) = dbValue.storage {
             return BigUInt(value)
         }
 

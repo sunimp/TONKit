@@ -1,8 +1,17 @@
+//
+//  TransactionDecoration.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import TonSwift
 
 open class TransactionDecoration {
-    public init() {}
-    required public init?(address: Address, actions: [Action]) {}
+    public init() { }
+    public required init?(address _: Address, actions _: [Action]) { }
 
     open func tags(userAddress _: Address) -> [TransactionTag] {
         []

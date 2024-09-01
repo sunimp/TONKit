@@ -1,5 +1,16 @@
+//
+//  OutgoingDecoration.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import BigInt
 import TonSwift
+
+// MARK: - OutgoingDecoration
 
 public class OutgoingDecoration: TransactionDecoration {
     public let address: Address
@@ -28,10 +39,10 @@ public class OutgoingDecoration: TransactionDecoration {
         guard let first = transfers.first(where: { $0.sender.address == address }) else { return nil }
 
         self.address = address
-        self.to = first.recipient.address
-        self.value = BigUInt(abs(amount))
-        self.comment = first.comment
-        self.sentToSelf = first.recipient.address == address
+        to = first.recipient.address
+        value = BigUInt(abs(amount))
+        comment = first.comment
+        sentToSelf = first.recipient.address == address
         
         super.init(address: address, actions: actions)
     }
@@ -48,6 +59,8 @@ public class OutgoingDecoration: TransactionDecoration {
         return tags
     }
 }
+
+// MARK: CustomStringConvertible
 
 extension OutgoingDecoration: CustomStringConvertible {
     public var description: String {

@@ -1,6 +1,16 @@
-import BigInt
+//
+//  TransactionSender.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import TonSwift
+
+// MARK: - TransactionSender
 
 class TransactionSender {
     private let api: TonApi
@@ -16,6 +26,8 @@ class TransactionSender {
     }
 }
 
+// MARK: - Amount
+
 public struct Amount {
     let value: BigUInt
     let isMax: Bool
@@ -27,7 +39,12 @@ public struct Amount {
 }
 
 extension TransactionSender {
-    func estimatedFee(recipient: FriendlyAddress, jetton: Jetton? = nil, amount: Amount, comment: String?) async throws -> Decimal {
+    func estimatedFee(
+        recipient: FriendlyAddress,
+        jetton: Jetton? = nil,
+        amount: Amount,
+        comment: String?
+    ) async throws -> Decimal {
         do {
             let seqno = try await api.getSeqno(address: sender)
             let timeout = await api.timeoutSafely()
@@ -55,7 +72,7 @@ extension TransactionSender {
             let transactionInfo = try await api.emulateMessageWallet(boc: boc)
 
             // for nfts transactionInfo.event can contains extra
-            return Decimal(transactionInfo.trace.transaction.total_fees)
+            return Decimal(transactionInfo.trace.transaction.totalFees)
         } catch {
             print(error)
             return 0

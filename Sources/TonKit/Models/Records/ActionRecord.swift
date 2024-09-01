@@ -1,4 +1,12 @@
+//
+//  ActionRecord.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import GRDB
 
 enum ActionRecord {
@@ -10,10 +18,17 @@ enum ActionRecord {
 
         // 1.1.1 Get transfers for all events
         let tonTransfersRecords = try TonTransferRecord.filter(eventIds.contains(TonTransferRecord.Columns.eventId)).fetchAll(db)
-        let jettonTransfersRecords = try JettonTransferRecord.filter(eventIds.contains(JettonTransferRecord.Columns.eventId)).fetchAll(db)
+        let jettonTransfersRecords = try JettonTransferRecord.filter(eventIds.contains(JettonTransferRecord.Columns.eventId))
+            .fetchAll(db)
         // 1.1.2 Reduce walletAccounts from tonTransferRecords
-        let tonTransfersAccounts = tonTransfersRecords.reduce(into: []) { uids, action in uids.append(contentsOf: [action.recipientUid, action.senderUid]) }
-        let jettonTransfersAccounts = jettonTransfersRecords.reduce(into: []) { uids, action in uids.append(contentsOf: [action.recipientUid, action.senderUid].compactMap { $0 } ) }
+        let tonTransfersAccounts = tonTransfersRecords.reduce(into: []) { uids, action in uids.append(contentsOf: [
+            action.recipientUid,
+            action.senderUid,
+        ]) }
+        let jettonTransfersAccounts = jettonTransfersRecords.reduce(into: []) { uids, action in uids.append(contentsOf: [
+            action.recipientUid,
+            action.senderUid,
+        ].compactMap { $0 }) }
         accountUids.append(contentsOf: tonTransfersAccounts)
         accountUids.append(contentsOf: jettonTransfersAccounts)
         // 1.x.1/2 same actions for other events
@@ -25,7 +40,10 @@ enum ActionRecord {
 
         // 3.1 Converting and grouping transfers
         let tonTransfers: [Action] = tonTransfersRecords.compactMap { record -> Action? in
-            guard let sender = accountMap[record.senderUid]?.walletAccount, let recipient = accountMap[record.recipientUid]?.walletAccount else { return nil }
+            guard
+                let sender = accountMap[record.senderUid]?.walletAccount,
+                let recipient = accountMap[record.recipientUid]?.walletAccount
+            else { return nil }
             return record.tonTransfer(sender: sender, recipient: recipient)
         }
         let jettonTransfers: [Action] = jettonTransfersRecords.compactMap { record -> Action? in

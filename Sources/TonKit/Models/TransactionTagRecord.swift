@@ -1,5 +1,15 @@
+//
+//  TransactionTagRecord.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import GRDB
+
+// MARK: - TransactionTagRecord
 
 class TransactionTagRecord: Record {
     let eventId: String

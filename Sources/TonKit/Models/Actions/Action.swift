@@ -1,11 +1,23 @@
-import BigInt
+//
+//  Action.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import GRDB
 import TonSwift
+
+// MARK: - IActionRecord
 
 protocol IActionRecord {
     func save(db: Database, index: Int, lt: Int64) throws
 }
+
+// MARK: - Action
 
 public class Action: Codable {
     public let eventId: String
@@ -16,6 +28,8 @@ public class Action: Codable {
         self.index = index
     }
 }
+
+// MARK: Comparable
 
 extension Action: Comparable {
     public static func < (lhs: Action, rhs: Action) -> Bool {

@@ -1,9 +1,19 @@
+//
+//  JettonInfo.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import TonSwift
 
 public struct JettonInfo: Codable, Equatable, Hashable {
+    
     public enum Verification: Codable {
         case none
+        case unknown
         case whitelist
         case blacklist
     }

@@ -1,6 +1,16 @@
+//
+//  TonTransfer.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import GRDB
 import TonSwift
+
+// MARK: - TonTransfer
 
 public class TonTransfer: Action {
     public let sender: WalletAccount
@@ -34,6 +44,8 @@ public class TonTransfer: Action {
         try super.init(from: decoder)
     }
 }
+
+// MARK: IActionRecord
 
 extension TonTransfer: IActionRecord {
     func save(db: Database, index: Int, lt: Int64) throws {

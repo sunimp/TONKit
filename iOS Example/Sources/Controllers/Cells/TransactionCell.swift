@@ -1,10 +1,18 @@
-import BigInt
-import Foundation
-import SnapKit
-import TonKit
+//
+//  BalanceCell.swift
+//  TonKit-Demo
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import UIKit
 
+import BigInt
+import SnapKit
+import TonKit
+
 class TransactionCell: UITableViewCell {
+    
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale.current
@@ -50,7 +58,7 @@ class TransactionCell: UITableViewCell {
     }
 
     func bind(transaction: TransactionRecord, coin _: String, lastBlockHeight _: Int?) {
-        var confirmations = "n/a"
+//        var confirmations = "n/a"
 
 //        var contract: Contract? = nil
 //

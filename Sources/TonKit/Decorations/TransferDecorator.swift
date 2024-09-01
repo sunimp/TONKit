@@ -1,5 +1,16 @@
+//
+//  TransferDecorator.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import BigInt
 import TonSwift
+
+// MARK: - TransferDecorator
 
 class TransferDecorator {
     private let address: Address
@@ -9,6 +20,8 @@ class TransferDecorator {
         self.address = address
     }
 }
+
+// MARK: ITransactionDecorator
 
 extension TransferDecorator: ITransactionDecorator {
     public func decoration(actions: [Action]) -> TransactionDecoration? {

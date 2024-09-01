@@ -1,13 +1,26 @@
+//
+//  TransactionManager.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Combine
 import Foundation
+
 import TonSwift
+
+// MARK: - TransactionManager
 
 class TransactionManager {
     private let userAddress: Address
     private let storage: AccountEventStorage
     private let decorationManager: DecorationManager
 
-    private let fullTransactionsWithTagsSubject = PassthroughSubject<[(transaction: FullTransaction, tags: [TransactionTag])], Never>()
+    private let fullTransactionsWithTagsSubject = PassthroughSubject<
+        [(transaction: FullTransaction, tags: [TransactionTag])],
+        Never
+    >()
 
     init(userAddress: Address, storage: AccountEventStorage, decorationManager: DecorationManager) {
         self.userAddress = userAddress
@@ -21,7 +34,10 @@ extension TransactionManager {
         fullTransactionsWithTagsSubject
             .map { transactionsWithTags in
                 guard let tagQueries else { return transactionsWithTags.map { $0.transaction } }
-                return transactionsWithTags.compactMap { (transaction: FullTransaction, tags: [TransactionTag]) -> FullTransaction? in
+                return transactionsWithTags.compactMap { (
+                    transaction: FullTransaction,
+                    tags: [TransactionTag]
+                ) -> FullTransaction? in
                     for tagQuery in tagQueries {
                         for tag in tags {
                             if tag.conforms(tagQuery: tagQuery) {
@@ -34,7 +50,7 @@ extension TransactionManager {
                 }
             }
             .filter { transactions in
-                transactions.count > 0
+                !transactions.isEmpty
             }
             .eraseToAnyPublisher()
     }
@@ -64,7 +80,8 @@ extension TransactionManager {
         storage.save(events: events, replaceOnConflict: true)
     }
     
-    @discardableResult func handle(events: [AccountEvent]) -> [FullTransaction] {
+    @discardableResult
+    func handle(events: [AccountEvent]) -> [FullTransaction] {
         guard !events.isEmpty else {
             return []
         }
@@ -88,6 +105,8 @@ extension TransactionManager {
         return fullTransactions
     }
 }
+
+// MARK: - ITransactionDecorator
 
 public protocol ITransactionDecorator {
     func decoration(actions: [Action]) -> TransactionDecoration?

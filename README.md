@@ -1,6 +1,6 @@
 # TonKit.Swift
 
-`TonKit.Swift` is a native(Swift) toolkit for TON network. it's based on TonKeeper libraries. It's implemented and used by [Unstoppable Wallet](https://github.com/horizontalsystems/unstoppable-wallet-ios), a multi-currency crypto wallet.
+`TonKit.Swift` is a native(Swift) toolkit for TON network. it's based on TonKeeper libraries.
 
 ## Core Features
 
@@ -47,15 +47,15 @@ TonKit.stop()
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/horizontalsystems/TonKit.Swift.git", .upToNextMajor(from: "1.0.0"))
+    .package(url: "https://github.com/sunimp/TonKit.Swift.git", .upToNextMajor(from: "0.4.0"))
 ]
 ```
 
 ## Prerequisites
 
-* Xcode 10.0+
-* Swift 5.5+
-* iOS 15+
+* Xcode 15.0+
+* Swift 5.10+
+* iOS 14+
 
 
 ## Example Project
@@ -64,5 +64,5 @@ All features of the library are used in example project located in `iOS Example`
 
 ## License
 
-The `TonKit.Swift` toolkit is open source and available under the terms of the [MIT License](https://github.com/horizontalsystems/TonKit.Swift/blob/master/LICENSE).
+The `TonKit.Swift` toolkit is open source and available under the terms of the [MIT License](https://github.com/sunimp/TonKit.Swift/blob/master/LICENSE).
 

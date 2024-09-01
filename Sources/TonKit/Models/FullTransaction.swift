@@ -1,3 +1,10 @@
+//
+//  FullTransaction.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
 
 public class FullTransaction {

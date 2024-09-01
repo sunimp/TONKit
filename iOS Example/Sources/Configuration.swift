@@ -1,4 +1,13 @@
-import HsToolKit
+//
+//  Configuration.swift
+//  TonKit-Demo
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
+import WWToolKit
 import TonKit
 
 class Configuration {
@@ -7,7 +16,7 @@ class Configuration {
     let network: Network = .mainNet
     let minLogLevel: Logger.Level = .verbose
 
-    let defaultsWords = ""
+    let defaultsWords = "vivid episode rabbit vapor they expose excess ten fog old ridge abandon"
     let defaultPassphrase = ""
 
     let defaultsWatchAddress = "EQDtFpEwcFAEcRe5mLVh2N6C0x-_hJEM7W61_JLnSF74p4q2"

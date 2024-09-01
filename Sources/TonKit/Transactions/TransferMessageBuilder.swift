@@ -1,20 +1,31 @@
-import BigInt
+//
+//  TonTransferMessageBuilder.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import TonSwift
 
+// MARK: - TonTransferMessageBuilder
+
 public struct TonTransferMessageBuilder {
-    private init() {}
-    public static func sendTonTransfer(contract: WalletContract,
-                                       sender: Address,
-                                       seqno: UInt64,
-                                       value: BigUInt,
-                                       isMax: Bool,
-                                       recipientAddress: Address,
-                                       isBounceable: Bool = true,
-                                       comment: String?,
-                                       timeout: UInt64?,
-                                       signClosure: (WalletTransfer) async throws -> Data) async throws -> String
-    {
+    private init() { }
+    public static func sendTonTransfer(
+        contract: WalletContract,
+        sender: Address,
+        seqno: UInt64,
+        value: BigUInt,
+        isMax: Bool,
+        recipientAddress: Address,
+        isBounceable: Bool = true,
+        comment: String?,
+        timeout: UInt64?,
+        signClosure: (WalletTransfer) async throws -> Data
+    ) async throws -> String {
         return try await ExternalMessageTransferBuilder.externalMessageTransfer(
             contract: contract,
             sender: sender,
@@ -23,14 +34,18 @@ public struct TonTransferMessageBuilder {
             internalMessages: { _ in
                 let internalMessage: MessageRelaxed
                 if let comment = comment {
-                    internalMessage = try MessageRelaxed.internal(to: recipientAddress,
-                                                                  value: value.magnitude,
-                                                                  bounce: isBounceable,
-                                                                  textPayload: comment)
+                    internalMessage = try MessageRelaxed.internal(
+                        to: recipientAddress,
+                        value: value.magnitude,
+                        bounce: isBounceable,
+                        textPayload: comment
+                    )
                 } else {
-                    internalMessage = MessageRelaxed.internal(to: recipientAddress,
-                                                              value: value.magnitude,
-                                                              bounce: isBounceable)
+                    internalMessage = MessageRelaxed.internal(
+                        to: recipientAddress,
+                        value: value.magnitude,
+                        bounce: isBounceable
+                    )
                 }
                 return [internalMessage]
             },
@@ -40,8 +55,10 @@ public struct TonTransferMessageBuilder {
     }
 }
 
+// MARK: - TonConnectTransferMessageBuilder
+
 public struct TonConnectTransferMessageBuilder {
-    private init() {}
+    private init() { }
 
     public struct Payload {
         let value: BigInt
@@ -49,11 +66,12 @@ public struct TonConnectTransferMessageBuilder {
         let stateInit: String?
         let payload: String?
 
-        public init(value: BigInt,
-                    recipientAddress: Address,
-                    stateInit: String?,
-                    payload: String?)
-        {
+        public init(
+            value: BigInt,
+            recipientAddress: Address,
+            stateInit: String?,
+            payload: String?
+        ) {
             self.value = value
             self.recipientAddress = recipientAddress
             self.stateInit = stateInit
@@ -61,13 +79,14 @@ public struct TonConnectTransferMessageBuilder {
         }
     }
 
-    public static func sendTonConnectTransfer(contract: WalletContract,
-                                              sender: Address,
-                                              seqno: UInt64,
-                                              payloads: [Payload],
-                                              timeout: UInt64?,
-                                              signClosure: (WalletTransfer) async throws -> Data) async throws -> String
-    {
+    public static func sendTonConnectTransfer(
+        contract: WalletContract,
+        sender: Address,
+        seqno: UInt64,
+        payloads: [Payload],
+        timeout: UInt64?,
+        signClosure: (WalletTransfer) async throws -> Data
+    ) async throws -> String {
         let messages = try payloads.map { payload in
             var stateInit: StateInit?
             if let stateInitString = payload.stateInit {
@@ -103,19 +122,22 @@ public struct TonConnectTransferMessageBuilder {
     }
 }
 
+// MARK: - TokenTransferMessageBuilder
+
 public struct TokenTransferMessageBuilder {
-    private init() {}
-    public static func sendTokenTransfer(contract: WalletContract,
-                                         sender: Address,
-                                         seqno: UInt64,
-                                         tokenAddress: Address,
-                                         value: BigUInt,
-                                         recipientAddress: Address,
-                                         isBounceable: Bool = true,
-                                         comment: String?,
-                                         timeout: UInt64?,
-                                         signClosure: (WalletTransfer) async throws -> Data) async throws -> String
-    {
+    private init() { }
+    public static func sendTokenTransfer(
+        contract: WalletContract,
+        sender: Address,
+        seqno: UInt64,
+        tokenAddress: Address,
+        value: BigUInt,
+        recipientAddress: Address,
+        isBounceable: Bool = true,
+        comment: String?,
+        timeout: UInt64?,
+        signClosure: (WalletTransfer) async throws -> Data
+    ) async throws -> String {
         return try await ExternalMessageTransferBuilder
             .externalMessageTransfer(
                 contract: contract,
@@ -138,18 +160,21 @@ public struct TokenTransferMessageBuilder {
     }
 }
 
+// MARK: - NFTTransferMessageBuilder
+
 public struct NFTTransferMessageBuilder {
-    private init() {}
-    public static func sendNFTTransfer(contract: WalletContract,
-                                       sender: Address,
-                                       seqno: UInt64,
-                                       nftAddress: Address,
-                                       recipientAddress: Address,
-                                       isBounceable: Bool = true,
-                                       transferAmount: BigUInt,
-                                       timeout: UInt64?,
-                                       signClosure: (WalletTransfer) async throws -> Data) async throws -> String
-    {
+    private init() { }
+    public static func sendNFTTransfer(
+        contract: WalletContract,
+        sender: Address,
+        seqno: UInt64,
+        nftAddress: Address,
+        recipientAddress: Address,
+        isBounceable: Bool = true,
+        transferAmount: BigUInt,
+        timeout: UInt64?,
+        signClosure: (WalletTransfer) async throws -> Data
+    ) async throws -> String {
         return try await ExternalMessageTransferBuilder
             .externalMessageTransfer(
                 contract: contract,
@@ -172,16 +197,21 @@ public struct NFTTransferMessageBuilder {
     }
 }
 
+// MARK: - ExternalMessageTransferBuilder
+
 public struct ExternalMessageTransferBuilder {
-    private init() {}
-    public static func externalMessageTransfer(contract: WalletContract,
-                                               sender: Address,
-                                               sendMode: SendMode = .walletDefault(),
-                                               seqno: UInt64,
-                                               internalMessages: (_ sender: Address) throws -> [MessageRelaxed],
-                                               timeout: UInt64?,
-                                               signClosure: (WalletTransfer) async throws -> Data) async throws -> String
-    {
+    
+    private init() { }
+    
+    public static func externalMessageTransfer(
+        contract: WalletContract,
+        sender: Address,
+        sendMode: SendMode = .walletDefault(),
+        seqno: UInt64,
+        internalMessages: (_ sender: Address) throws -> [MessageRelaxed],
+        timeout: UInt64?,
+        signClosure: (WalletTransfer) async throws -> Data
+    ) async throws -> String {
         let internalMessages = try internalMessages(sender)
         let transferData = WalletTransferData(
             seqno: seqno,
@@ -190,16 +220,18 @@ public struct ExternalMessageTransferBuilder {
             timeout: timeout
         )
 
-        let transfer = try contract.createTransfer(args: transferData)
+        let transfer = try contract.createTransfer(args: transferData, messageType: .ext)
         let signedTransfer = try await signClosure(transfer)
         let body = Builder()
         try body.store(data: signedTransfer)
         try body.store(transfer.signingMessage)
         let transferCell = try body.endCell()
 
-        let externalMessage = Message.external(to: sender,
-                                               stateInit: contract.stateInit,
-                                               body: transferCell)
+        let externalMessage = Message.external(
+            to: sender,
+            stateInit: contract.stateInit,
+            body: transferCell
+        )
         let cell = try Builder().store(externalMessage).endCell()
         return try cell.toBoc().base64EncodedString()
     }

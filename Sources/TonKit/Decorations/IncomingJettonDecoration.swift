@@ -1,5 +1,16 @@
+//
+//  IncomingJettonDecoration.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
+import Foundation
+
 import BigInt
 import TonSwift
+
+// MARK: - IncomingJettonDecoration
 
 public class IncomingJettonDecoration: TransactionDecoration {
     public let from: Address
@@ -22,15 +33,17 @@ public class IncomingJettonDecoration: TransactionDecoration {
         let amount = IncomingJettonDecoration.incomingAmount(address: address, transfers: transfers)
         guard amount > 0 else { return nil }
 
-        guard let first = transfers.first(where: {
-            guard let recipient = $0.recipient else { return false }
-            return recipient.address == address
-        }), let sender = first.sender else { return nil }
+        guard
+            let first = transfers.first(where: {
+                guard let recipient = $0.recipient else { return false }
+                return recipient.address == address
+            }), let sender = first.sender
+        else { return nil }
 
-        self.from = sender.address
-        self.jettonAddress = first.jettonAddress
-        self.value = BigUInt(abs(amount))
-        self.comment = first.comment
+        from = sender.address
+        jettonAddress = first.jettonAddress
+        value = BigUInt(abs(amount))
+        comment = first.comment
 
         super.init(address: address, actions: actions)
     }
@@ -41,6 +54,8 @@ public class IncomingJettonDecoration: TransactionDecoration {
         ]
     }
 }
+
+// MARK: CustomStringConvertible
 
 extension IncomingJettonDecoration: CustomStringConvertible {
     public var description: String {

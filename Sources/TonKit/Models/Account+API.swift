@@ -1,15 +1,24 @@
+//
+//  Account+API.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import TonAPI
 import TonSwift
 
 extension Account {
-    init(account: Components.Schemas.Account) throws {
+    
+    init(account: TonAPI.Account) throws {
         address = try Address.parse(account.address)
         balance = account.balance
-        status = account.status
+        status = account.status.rawValue
         name = account.name
         icon = account.icon
-        isSuspended = account.is_suspended
-        isWallet = account.is_wallet
+        isSuspended = account.isSuspended
+        isWallet = account.isWallet
     }
 }

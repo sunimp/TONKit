@@ -1,5 +1,13 @@
-import BigInt
+//
+//  UnknownTransactionDecoration.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import TonSwift
 
 open class UnknownTransactionDecoration: TransactionDecoration {
@@ -10,7 +18,7 @@ open class UnknownTransactionDecoration: TransactionDecoration {
         super.init()
     }
     
-    required public init?(address: Address, actions: [Action]) {
+    public required init?(address: Address, actions: [Action]) {
         self.actions = actions
         super.init(address: address, actions: actions)
     }

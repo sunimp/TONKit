@@ -1,5 +1,13 @@
-import TonKit
+//
+//  ReceiveController.swift
+//  TonKit-Demo
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import UIKit
+
+import TonKit
 
 class MainController: UITabBarController {
     override func viewDidLoad() {

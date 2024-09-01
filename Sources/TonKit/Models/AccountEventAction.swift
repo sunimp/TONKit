@@ -1,5 +1,13 @@
-import BigInt
+//
+//  AccountEventAction.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import GRDB
 import TonSwift
 
@@ -48,22 +56,22 @@ public class AccountEventAction: Codable {
         let beneficiary: WalletAccount
     }
 
-//    struct AuctionBid: Codable {
-//        let auctionType: String
-//        let price: Price
-//        let nft: Nft?
-//        let bidder: WalletAccount
-//        let auction: WalletAccount
-//    }
-//
-//    struct NFTPurchase: Codable {
-//        let auctionType: String
-//        let nft: Nft
-//        let seller: WalletAccount
-//        let buyer: WalletAccount
-//        let price: BigUInt
-//    }
-//
+    ///    struct AuctionBid: Codable {
+    ///        let auctionType: String
+    ///        let price: Price
+    ///        let nft: Nft?
+    ///        let bidder: WalletAccount
+    ///        let auction: WalletAccount
+    ///    }
+    ///
+    ///    struct NFTPurchase: Codable {
+    ///        let auctionType: String
+    ///        let nft: Nft
+    ///        let seller: WalletAccount
+    ///        let buyer: WalletAccount
+    ///        let price: BigUInt
+    ///    }
+    ///
     struct DepositStake: Codable {
         let amount: Int64
         let staker: WalletAccount

@@ -1,21 +1,30 @@
-import BigInt
+//
+//  AccountEvent+API.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import TonAPI
 import TonSwift
 
 extension AccountEvent {
-    init(accountEvent: Components.Schemas.AccountEvent) throws {
+    
+    init(accountEvent: TonAPI.AccountEvent) throws {
         let account = try WalletAccount(accountAddress: accountEvent.account)
-        let actions = Action.from(eventId: accountEvent.event_id, actions: accountEvent.actions)
+        let actions = Action.from(eventId: accountEvent.eventId, actions: accountEvent.actions)
         guard !actions.isEmpty else {
             throw Action.MapError.unsupported
         }
         self.init(
-            eventId: accountEvent.event_id,
+            eventId: accountEvent.eventId,
             timestamp: TimeInterval(accountEvent.timestamp),
             account: account,
-            isScam: accountEvent.is_scam,
-            isInProgress: accountEvent.in_progress,
+            isScam: accountEvent.isScam,
+            isInProgress: accountEvent.inProgress,
             fee: accountEvent.extra,
             lt: accountEvent.lt,
             actions: actions

@@ -1,8 +1,17 @@
-import BigInt
+//
+//  TonAdapter.swift
+//  TonKit-Demo
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Combine
 import Foundation
+
+import BigInt
 import TonKit
 import TonSwift
+import WWExtensions
 
 class TonAdapter {
     public let tonKit: Kit
@@ -17,7 +26,7 @@ class TonAdapter {
 
         return TransactionRecord(
             transactionHash: transaction.eventId,
-            transactionHashData: transaction.eventId.hs.data,
+            transactionHashData: transaction.eventId.ww.data,
             timestamp: Int(transaction.timestamp),
             isInProgress: transaction.isInProgress,
             lt: transaction.lt,

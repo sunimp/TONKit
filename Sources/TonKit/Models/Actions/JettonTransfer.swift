@@ -1,7 +1,17 @@
+//
+//  JettonTransfer.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
+import BigInt
 import GRDB
 import TonSwift
-import BigInt
+
+// MARK: - JettonTransfer
 
 public class JettonTransfer: Action {
     let sender: WalletAccount?
@@ -12,7 +22,17 @@ public class JettonTransfer: Action {
     let jettonAddress: Address
     let comment: String?
 
-    init(eventId: String, index: Int, sender: WalletAccount?, recipient: WalletAccount?, senderAddress: Address, recipientAddress: Address, amount: BigUInt, jettonAddress: Address, comment: String?) {
+    init(
+        eventId: String,
+        index: Int,
+        sender: WalletAccount?,
+        recipient: WalletAccount?,
+        senderAddress: Address,
+        recipientAddress: Address,
+        amount: BigUInt,
+        jettonAddress: Address,
+        comment: String?
+    ) {
         self.sender = sender
         self.recipient = recipient
         self.senderAddress = senderAddress
@@ -47,6 +67,8 @@ public class JettonTransfer: Action {
         try super.init(from: decoder)
     }
 }
+
+// MARK: IActionRecord
 
 extension JettonTransfer: IActionRecord {
     func save(db: Database, index: Int, lt: Int64) throws {

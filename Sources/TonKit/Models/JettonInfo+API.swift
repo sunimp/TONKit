@@ -1,9 +1,18 @@
+//
+//  JettonInfo+API.swift
+//  TonKit
+//
+//  Created by Sun on 2024/8/26.
+//
+
 import Foundation
+
 import TonAPI
 import TonSwift
 
 extension JettonInfo {
-    init(jettonPreview: Components.Schemas.JettonPreview) throws {
+    
+    init(jettonPreview: TonAPI.JettonPreview) throws {
         let tokenAddress = try TonSwift.Address.parse(jettonPreview.address)
         address = tokenAddress
         fractionDigits = jettonPreview.decimals
@@ -17,8 +26,10 @@ extension JettonInfo {
             verification = .whitelist
         case .blacklist:
             verification = .blacklist
-        case .none:
+        case ._none:
             verification = .none
+        case .unknownDefaultOpenApi:
+            verification = .unknown
         }
         self.verification = verification
     }

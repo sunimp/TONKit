@@ -47,7 +47,7 @@ TonKit.stop()
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/sunimp/TonKit.Swift.git", .upToNextMajor(from: "0.4.0"))
+    .package(url: "https://github.com/sunimp/TonKit.Swift.git", .upToNextMajor(from: "0.5.0"))
 ]
 ```
 

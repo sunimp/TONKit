@@ -20,7 +20,7 @@ let package = Package(
         .package(url: "https://github.com/tristanhimmelman/ObjectMapper.git", .upToNextMajor(from: "4.4.3")),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.21.0"),
         .package(url: "https://github.com/tonkeeper/ton-api-swift.git", .upToNextMajor(from: "0.2.0")),
-        .package(url: "https://github.com/tonkeeper/ton-swift.git", .upToNextMajor(from: "1.0.16")),
+        .package(url: "https://github.com/sunimp/ton-swift.git", .upToNextMajor(from: "1.1.0")),
         .package(url: "https://github.com/sunimp/WWCryptoKit.Swift.git", .upToNextMajor(from: "1.3.7")),
         .package(url: "https://github.com/sunimp/HDWalletKit.Swift.git", .upToNextMajor(from: "1.3.7")),
         .package(url: "https://github.com/sunimp/WWToolKit.Swift.git", .upToNextMajor(from: "2.1.2")),

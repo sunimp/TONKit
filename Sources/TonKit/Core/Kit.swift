@@ -195,9 +195,9 @@ extension Kit {
 
         let serverURL = URL(string: "https://tonapi.io")!
         var transport = TonTransport()
-        let apiClient = Client(serverURL: serverURL, transport: transport.transport, middlewares: [])
+        
         let urlSession = URLSession(configuration: transport.urlSessionConfiguration)
-        let api = TonApi(tonAPIClient: apiClient, urlSession: urlSession, url: serverURL)
+        let api = TonApi(urlSession: urlSession, url: serverURL)
 
         let accountInfoManager = AccountInfoManager(storage: accountInfoStorage)
         let transactionManager = TransactionManager(

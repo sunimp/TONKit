@@ -17,12 +17,10 @@ import TonSwift
 
 struct TonApi {
     
-    private let tonAPIClient: TonStreamingAPI.Client
     private let urlSession: URLSession
     let url: URL
 
-    init(tonAPIClient: TonStreamingAPI.Client, urlSession: URLSession, url: URL) {
-        self.tonAPIClient = tonAPIClient
+    init(urlSession: URLSession, url: URL) {
         self.urlSession = urlSession
         self.url = url
     }
@@ -213,38 +211,38 @@ extension TonApi {
     }
 }
 
-//// MARK: - DNS
-//
-// extension TonApi {
-//  enum DNSError: Swift.Error {
-//    case noWalletData
-//  }
-//
-//  func resolveDomainName(_ domainName: String) async throws -> FriendlyAddress {
-//    let response = try await tonAPIClient.dnsResolve(path: .init(domain_name: domainName))
-//    let entity = try response.ok.body.json
-//    guard let wallet = entity.wallet else {
-//      throw DNSError.noWalletData
-//    }
-//
-//    let address = try Address.parse(wallet.address)
-//    return FriendlyAddress(address: address, bounceable: !wallet.is_wallet)
-//  }
-//
-//  func getDomainExpirationDate(_ domainName: String) async throws -> Date? {
-//    let response = try await tonAPIClient.getDnsInfo(path: .init(domain_name: domainName))
-//    let entity = try response.ok.body.json
-//    guard let expiringAt = entity.expiring_at else { return nil }
-//    return Date(timeIntervalSince1970: TimeInterval(integerLiteral: Int64(expiringAt)))
-//  }
-// }
-//
-// extension TonApi {
-//  enum APIError: Swift.Error {
-//    case incorrectResponse
-//    case serverError(statusCode: Int)
-//  }
-// }
+// MARK: - DNS
+
+extension TonApi {
+    
+    enum DNSError: Swift.Error {
+        case noWalletData
+    }
+    
+    func resolveDomainName(_ domainName: String) async throws -> FriendlyAddress {
+        let response = try await DNSAPI.dnsResolve(domainName: domainName)
+        guard let wallet = response.wallet else {
+            throw DNSError.noWalletData
+        }
+        
+        let address = try Address.parse(wallet.address)
+        return FriendlyAddress(address: address, bounceable: !wallet.isWallet)
+    }
+    
+    func getDomainExpirationDate(_ domainName: String) async throws -> Date? {
+        let response = try await DNSAPI.getDnsInfo(domainName: domainName)
+        guard let expiringAt = response.expiringAt else { return nil }
+        return Date(timeIntervalSince1970: TimeInterval(integerLiteral: Int64(expiringAt)))
+    }
+}
+
+extension TonApi {
+    
+    enum APIError: Swift.Error {
+        case incorrectResponse
+        case serverError(statusCode: Int)
+    }
+}
 
 // MARK: - Time
 

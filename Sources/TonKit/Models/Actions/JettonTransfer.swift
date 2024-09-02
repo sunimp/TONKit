@@ -1,8 +1,7 @@
 //
 //  JettonTransfer.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/20.
 //
 
 import Foundation
@@ -14,6 +13,20 @@ import TonSwift
 // MARK: - JettonTransfer
 
 public class JettonTransfer: Action {
+    // MARK: Nested Types
+
+    enum CodingKeys: String, CodingKey {
+        case sender
+        case recipient
+        case senderAddress
+        case recipientAddress
+        case amount
+        case jettonAddress
+        case comment
+    }
+
+    // MARK: Properties
+
     let sender: WalletAccount?
     let recipient: WalletAccount?
     let senderAddress: Address
@@ -22,8 +35,10 @@ public class JettonTransfer: Action {
     let jettonAddress: Address
     let comment: String?
 
+    // MARK: Lifecycle
+
     init(
-        eventId: String,
+        eventID: String,
         index: Int,
         sender: WalletAccount?,
         recipient: WalletAccount?,
@@ -41,17 +56,7 @@ public class JettonTransfer: Action {
         self.jettonAddress = jettonAddress
         self.comment = comment
 
-        super.init(eventId: eventId, index: index)
-    }
-
-    enum CodingKeys: String, CodingKey {
-        case sender
-        case recipient
-        case senderAddress
-        case recipientAddress
-        case amount
-        case jettonAddress
-        case comment
+        super.init(eventID: eventID, index: index)
     }
 
     required init(from decoder: Decoder) throws {

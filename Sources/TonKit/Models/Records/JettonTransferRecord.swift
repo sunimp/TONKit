@@ -1,8 +1,7 @@
 //
 //  JettonTransferRecord.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/20.
 //
 
 import Foundation
@@ -14,7 +13,30 @@ import TonSwift
 // MARK: - JettonTransferRecord
 
 class JettonTransferRecord: Record {
-    let eventId: String
+    // MARK: Nested Types
+
+    enum Columns: String, ColumnExpression {
+        case eventID
+        case index
+        case lt
+        case senderUid
+        case recipientUid
+        case senderAddressUid
+        case recipientAddressUid
+        case amount
+        case jettonAddressUid
+        case comment
+    }
+
+    // MARK: Overridden Properties
+
+    override class var databaseTableName: String {
+        return "jetton_transfer"
+    }
+
+    // MARK: Properties
+
+    let eventID: String
     let index: Int
     let lt: Int64
     let senderUid: String?
@@ -25,8 +47,10 @@ class JettonTransferRecord: Record {
     let jettonAddressUid: String
     let comment: String?
 
+    // MARK: Lifecycle
+
     init(
-        eventId: String,
+        eventID: String,
         index: Int,
         lt: Int64,
         senderUid: String?,
@@ -37,7 +61,7 @@ class JettonTransferRecord: Record {
         jettonAddressUid: String,
         comment: String?
     ) {
-        self.eventId = eventId
+        self.eventID = eventID
         self.index = index
         self.lt = lt
         self.senderUid = senderUid
@@ -51,25 +75,8 @@ class JettonTransferRecord: Record {
         super.init()
     }
 
-    override class var databaseTableName: String {
-        return "jetton_transfer"
-    }
-
-    enum Columns: String, ColumnExpression {
-        case eventId
-        case index
-        case lt
-        case senderUid
-        case recipientUid
-        case senderAddressUid
-        case recipientAddressUid
-        case amount
-        case jettonAddressUid
-        case comment
-    }
-
     required init(row: Row) throws {
-        eventId = row[Columns.eventId]
+        eventID = row[Columns.eventID]
         index = row[Columns.index]
         lt = row[Columns.lt]
         senderUid = row[Columns.senderUid]
@@ -88,8 +95,10 @@ class JettonTransferRecord: Record {
         try super.init(row: row)
     }
 
+    // MARK: Overridden Functions
+
     override func encode(to container: inout PersistenceContainer) {
-        container[Columns.eventId] = eventId
+        container[Columns.eventID] = eventID
         container[Columns.index] = index
         container[Columns.lt] = lt
         container[Columns.senderUid] = senderUid
@@ -113,7 +122,7 @@ extension JettonTransferRecord {
         }
         
         return .init(
-            eventId: eventId,
+            eventID: eventID,
             index: index,
             sender: sender,
             recipient: recipient,
@@ -127,7 +136,7 @@ extension JettonTransferRecord {
 
     static func record(index: Int, lt: Int64, _ from: JettonTransfer) -> JettonTransferRecord {
         .init(
-            eventId: from.eventId,
+            eventID: from.eventID,
             index: index,
             lt: lt,
             senderUid: from.sender?.address.toRaw(),

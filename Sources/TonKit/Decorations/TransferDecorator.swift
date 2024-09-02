@@ -1,8 +1,7 @@
 //
 //  TransferDecorator.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/20.
 //
 
 import Foundation
@@ -13,8 +12,13 @@ import TonSwift
 // MARK: - TransferDecorator
 
 class TransferDecorator {
-    private let address: Address
+    // MARK: Properties
+
     var decorations = [TransactionDecoration.Type]()
+
+    private let address: Address
+
+    // MARK: Lifecycle
 
     init(address: Address) {
         self.address = address

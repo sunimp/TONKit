@@ -25,7 +25,7 @@ let address = try FriedlyAddress(string: "0x...")
 let TonKit = try Kit.instance(
     type: .watch(address), 
     network: .mainnet, 
-    walletId: "unique_wallet_id", 
+    walletID: "unique_wallet_id", 
     minLogLevel: .error
 )
 ```
@@ -38,6 +38,11 @@ let TonKit = try Kit.instance(
 TonKit.start()
 TonKit.stop()
 ```
+## Requirements
+
+* Xcode 15.4+
+* Swift 5.10+
+* iOS 14.0+
 
 ## Installation
 
@@ -47,16 +52,9 @@ TonKit.stop()
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/sunimp/TonKit.Swift.git", .upToNextMajor(from: "0.5.0"))
+    .package(url: "https://github.com/sunimp/TonKit.Swift.git", .upToNextMajor(from: "0.6.0"))
 ]
 ```
-
-## Prerequisites
-
-* Xcode 15.0+
-* Swift 5.10+
-* iOS 14+
-
 
 ## Example Project
 

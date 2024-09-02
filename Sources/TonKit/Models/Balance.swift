@@ -1,8 +1,7 @@
 //
 //  Balance.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -13,9 +12,27 @@ import GRDB
 // MARK: - Balance
 
 class Balance: Record {
+    // MARK: Nested Types
+
+    enum Columns: String, ColumnExpression {
+        case id
+        case wallet
+        case balance
+    }
+
+    // MARK: Overridden Properties
+
+    override class var databaseTableName: String {
+        return "balances"
+    }
+
+    // MARK: Properties
+
     let id: String
     let wallet: String?
     var balance: BigUInt
+
+    // MARK: Lifecycle
 
     init(id: String, wallet: String?, balance: BigUInt) {
         self.id = id
@@ -25,16 +42,6 @@ class Balance: Record {
         super.init()
     }
 
-    override class var databaseTableName: String {
-        return "balances"
-    }
-
-    enum Columns: String, ColumnExpression {
-        case id
-        case wallet
-        case balance
-    }
-
     required init(row: Row) throws {
         id = row[Columns.id]
         wallet = row[Columns.wallet]
@@ -42,6 +49,8 @@ class Balance: Record {
 
         try super.init(row: row)
     }
+
+    // MARK: Overridden Functions
 
     override func encode(to container: inout PersistenceContainer) {
         container[Columns.id] = id
@@ -58,7 +67,7 @@ extension BigUInt: DatabaseValueConvertible {
     }
 
     public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> BigUInt? {
-        if case DatabaseValue.Storage.string(let value) = dbValue.storage {
+        if case let DatabaseValue.Storage.string(value) = dbValue.storage {
             return BigUInt(value)
         }
 

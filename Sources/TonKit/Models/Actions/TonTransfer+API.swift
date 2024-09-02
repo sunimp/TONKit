@@ -1,8 +1,7 @@
 //
-//  TonTransfer.swift
-//  TonKit
+//  TonTransfer+API.swift
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -11,15 +10,14 @@ import TonAPI
 import TonSwift
 
 extension TonTransfer {
-    
-    convenience init(eventId: String, index: Int, action: TonTransferAction) throws {
+    convenience init(eventID: String, index: Int, action: TonTransferAction) throws {
         let sender = try WalletAccount(accountAddress: action.sender)
         let recipient = try WalletAccount(accountAddress: action.recipient)
         let amount = action.amount
         let comment = action.comment
 
         self.init(
-            eventId: eventId,
+            eventID: eventID,
             index: index,
             sender: sender,
             recipient: recipient,

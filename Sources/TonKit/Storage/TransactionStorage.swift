@@ -1,8 +1,7 @@
 //
-//  AccountEventStorage.swift
-//  TonKit
+//  TransactionStorage.swift
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -12,16 +11,11 @@ import GRDB
 // MARK: - AccountEventStorage
 
 class AccountEventStorage {
-    
+    // MARK: Properties
+
     private let dbPool: DatabasePool
 
-    init(databaseDirectoryURL: URL, databaseFileName: String) {
-        let databaseURL = databaseDirectoryURL.appendingPathComponent("\(databaseFileName).sqlite")
-
-        dbPool = try! DatabasePool(path: databaseURL.path)
-
-        try! migrator.migrate(dbPool)
-    }
+    // MARK: Computed Properties
 
     var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
@@ -49,7 +43,7 @@ class AccountEventStorage {
 
         migrator.registerMigration("Create AccountEvent") { db in
             try db.create(table: AccountEventRecord.databaseTableName) { t in
-                t.column(AccountEventRecord.Columns.eventId.name, .text).notNull().primaryKey(onConflict: .replace)
+                t.column(AccountEventRecord.Columns.eventID.name, .text).notNull().primaryKey(onConflict: .replace)
                 t.column(AccountEventRecord.Columns.timestamp.name, .integer).notNull()
                 t.column(AccountEventRecord.Columns.accountUid.name, .blob).notNull()
                 t.column(AccountEventRecord.Columns.isScam.name, .boolean).notNull()
@@ -70,7 +64,7 @@ class AccountEventStorage {
 
         migrator.registerMigration("create TonTransfer") { db in
             try db.create(table: TonTransferRecord.databaseTableName) { t in
-                t.column(TonTransferRecord.Columns.eventId.name, .text).notNull()
+                t.column(TonTransferRecord.Columns.eventID.name, .text).notNull()
                 t.column(TonTransferRecord.Columns.index.name, .integer).notNull()
                 t.column(TonTransferRecord.Columns.lt.name, .integer).notNull()
                 t.column(TonTransferRecord.Columns.senderUid.name, .text).notNull()
@@ -78,22 +72,25 @@ class AccountEventStorage {
                 t.column(TonTransferRecord.Columns.amount.name, .integer).notNull()
                 t.column(TonTransferRecord.Columns.comment.name, .text)
 
-                t.primaryKey([TonTransferRecord.Columns.eventId.name, TonTransferRecord.Columns.index.name], onConflict: .replace)
+                t.primaryKey(
+                    [TonTransferRecord.Columns.eventID.name, TonTransferRecord.Columns.index.name],
+                    onConflict: .replace
+                )
             }
         }
 
         migrator.registerMigration("create TransactionTagRecord") { db in
             try db.create(table: TransactionTagRecord.databaseTableName) { t in
-                t.column(TransactionTagRecord.Columns.eventId.name, .blob).notNull().indexed()
+                t.column(TransactionTagRecord.Columns.eventID.name, .blob).notNull().indexed()
                 t.column(TransactionTagRecord.Columns.type.name, .text).notNull()
                 t.column(TransactionTagRecord.Columns.protocol.name, .text)
                 t.column(TransactionTagRecord.Columns.jettonAddress.name, .blob)
                 t.column(TransactionTagRecord.Columns.addresses.name, .text).notNull()
 
                 t.foreignKey(
-                    [TransactionTagRecord.Columns.eventId.name],
+                    [TransactionTagRecord.Columns.eventID.name],
                     references: AccountEventRecord.databaseTableName,
-                    columns: [AccountEventRecord.Columns.eventId.name],
+                    columns: [AccountEventRecord.Columns.eventID.name],
                     onDelete: .cascade,
                     onUpdate: .cascade,
                     deferred: true
@@ -103,7 +100,7 @@ class AccountEventStorage {
 
         migrator.registerMigration("create JettonTransfer") { db in
             try db.create(table: JettonTransferRecord.databaseTableName) { t in
-                t.column(JettonTransferRecord.Columns.eventId.name, .text).notNull()
+                t.column(JettonTransferRecord.Columns.eventID.name, .text).notNull()
                 t.column(JettonTransferRecord.Columns.index.name, .integer).notNull()
                 t.column(JettonTransferRecord.Columns.lt.name, .integer).notNull()
                 t.column(JettonTransferRecord.Columns.senderUid.name, .text)
@@ -115,7 +112,7 @@ class AccountEventStorage {
                 t.column(JettonTransferRecord.Columns.comment.name, .text)
 
                 t.primaryKey(
-                    [JettonTransferRecord.Columns.eventId.name, JettonTransferRecord.Columns.index.name],
+                    [JettonTransferRecord.Columns.eventID.name, JettonTransferRecord.Columns.index.name],
                     onConflict: .replace
                 )
             }
@@ -123,13 +120,25 @@ class AccountEventStorage {
 
         return migrator
     }
+
+    // MARK: Lifecycle
+
+    init(databaseDirectoryURL: URL, databaseFileName: String) {
+        let databaseURL = databaseDirectoryURL.appendingPathComponent("\(databaseFileName).sqlite")
+
+        dbPool = try! DatabasePool(path: databaseURL.path)
+
+        try! migrator.migrate(dbPool)
+    }
 }
 
 extension AccountEventStorage {
-    func event(eventId: String) -> AccountEvent? {
+    func event(eventID: String) -> AccountEvent? {
         try! dbPool.read { db in
-            guard let record = try AccountEventRecord.filter(AccountEventRecord.Columns.eventId == eventId).fetchOne(db)
-            else { return nil }
+            guard let record = try AccountEventRecord.filter(AccountEventRecord.Columns.eventID == eventID).fetchOne(db)
+            else {
+                return nil
+            }
             return try [record].events(db: db).first
         }
     }
@@ -181,38 +190,37 @@ extension AccountEventStorage {
 
                 whereConditions.append(tagConditions)
                 joinClause =
-                    "INNER JOIN \(TransactionTagRecord.databaseTableName) ON \(AccountEventRecord.databaseTableName).\(AccountEventRecord.Columns.eventId.name) = \(TransactionTagRecord.databaseTableName).\(TransactionTagRecord.Columns.eventId.name)"
+                    "INNER JOIN \(TransactionTagRecord.databaseTableName) ON \(AccountEventRecord.databaseTableName).\(AccountEventRecord.Columns.eventID.name) = \(TransactionTagRecord.databaseTableName).\(TransactionTagRecord.Columns.eventID.name)"
             }
 
             if
-                let lt = lt,
-                let fromTransaction = try AccountEventRecord.filter(AccountEventRecord.Columns.lt == lt).fetchOne(db)
-            {
+                let lt,
+                let fromTransaction = try AccountEventRecord.filter(AccountEventRecord.Columns.lt == lt).fetchOne(db) {
                 let fromCondition = """
                     (
                      \(AccountEventRecord.Columns.lt.name) < ? OR
                          (
                              \(AccountEventRecord.databaseTableName).\(AccountEventRecord.Columns.lt.name) = ? AND
-                             \(AccountEventRecord.databaseTableName).\(AccountEventRecord.Columns.eventId.name) < ?
+                             \(AccountEventRecord.databaseTableName).\(AccountEventRecord.Columns.eventID.name) < ?
                          )
                     )
                     """
 
                 arguments.append(fromTransaction.lt)
                 arguments.append(fromTransaction.lt)
-                arguments.append(fromTransaction.eventId)
+                arguments.append(fromTransaction.eventID)
 
                 whereConditions.append(fromCondition)
             }
 
             var limitClause = ""
-            if let limit = limit {
+            if let limit {
                 limitClause += "LIMIT \(limit)"
             }
 
             let orderClause = """
                 ORDER BY \(AccountEventRecord.databaseTableName).\(AccountEventRecord.Columns.lt.name) DESC,
-                \(AccountEventRecord.databaseTableName).\(AccountEventRecord.Columns.eventId.name) DESC
+                \(AccountEventRecord.databaseTableName).\(AccountEventRecord.Columns.eventID.name) DESC
                 """
 
             let whereClause = whereConditions.count > 0 ? "WHERE \(whereConditions.joined(separator: " AND "))" : ""
@@ -248,7 +256,7 @@ extension AccountEventStorage {
                     return nil
                 }
                 return try AccountEventRecord
-                    .filter(AccountEventRecord.Columns.eventId == record.eventId)
+                    .filter(AccountEventRecord.Columns.eventID == record.eventID)
                     .fetchOne(db)
             }
             guard
@@ -259,7 +267,7 @@ extension AccountEventStorage {
                 return nil
             }
             return try AccountEventRecord
-                .filter(AccountEventRecord.Columns.eventId == record.eventId)
+                .filter(AccountEventRecord.Columns.eventID == record.eventID)
                 .fetchOne(db)
         }
     }

@@ -1,8 +1,7 @@
 //
 //  OutgoingJettonDecoration.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/20.
 //
 
 import Foundation
@@ -13,12 +12,16 @@ import TonSwift
 // MARK: - OutgoingJettonDecoration
 
 public class OutgoingJettonDecoration: TransactionDecoration {
+    // MARK: Properties
+
     public let address: Address
     public let to: Address
     public let jettonAddress: Address
     public let value: BigUInt
     public let comment: String?
     public let sentToSelf: Bool
+
+    // MARK: Lifecycle
 
     init(address: Address, to: Address, jettonAddress: Address, value: BigUInt, comment: String?, sentToSelf: Bool) {
         self.address = address
@@ -36,16 +39,21 @@ public class OutgoingJettonDecoration: TransactionDecoration {
         let transfers = actions.compactMap { $0 as? JettonTransfer }
 
         let amount = IncomingJettonDecoration.incomingAmount(address: address, transfers: transfers)
-        guard amount <= 0 else { return nil }
+        guard amount <= 0 else {
+            return nil
+        }
 
         guard
             let first = transfers.first(where: {
-                guard let sender = $0.sender else { return false }
+                guard let sender = $0.sender else {
+                    return false
+                }
                 return sender.address == address
             }), let recipient = first.recipient
-        else { return nil }
+        else {
+            return nil
+        }
 
-        
         self.address = address
         to = recipient.address
         jettonAddress = first.jettonAddress
@@ -54,6 +62,8 @@ public class OutgoingJettonDecoration: TransactionDecoration {
         sentToSelf = recipient.address == address
         super.init(address: address, actions: actions)
     }
+
+    // MARK: Overridden Functions
 
     override public func tags(userAddress _: Address) -> [TransactionTag] {
         var tags = [

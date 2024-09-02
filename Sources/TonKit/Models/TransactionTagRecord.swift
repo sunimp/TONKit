@@ -1,8 +1,7 @@
 //
 //  TransactionTagRecord.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -12,30 +11,38 @@ import GRDB
 // MARK: - TransactionTagRecord
 
 class TransactionTagRecord: Record {
-    let eventId: String
-    let tag: TransactionTag
-
-    init(eventId: String, tag: TransactionTag) {
-        self.eventId = eventId
-        self.tag = tag
-
-        super.init()
-    }
-
-    override class var databaseTableName: String {
-        "transaction_tag"
-    }
+    // MARK: Nested Types
 
     enum Columns: String, ColumnExpression, CaseIterable {
-        case eventId
+        case eventID
         case type
         case `protocol`
         case jettonAddress
         case addresses
     }
 
+    // MARK: Overridden Properties
+
+    override class var databaseTableName: String {
+        "transaction_tag"
+    }
+
+    // MARK: Properties
+
+    let eventID: String
+    let tag: TransactionTag
+
+    // MARK: Lifecycle
+
+    init(eventID: String, tag: TransactionTag) {
+        self.eventID = eventID
+        self.tag = tag
+
+        super.init()
+    }
+
     required init(row: Row) throws {
-        eventId = row[Columns.eventId]
+        eventID = row[Columns.eventID]
         tag = TransactionTag(
             type: row[Columns.type],
             protocol: row[Columns.protocol],
@@ -46,8 +53,10 @@ class TransactionTagRecord: Record {
         try super.init(row: row)
     }
 
+    // MARK: Overridden Functions
+
     override func encode(to container: inout PersistenceContainer) {
-        container[Columns.eventId] = eventId
+        container[Columns.eventID] = eventID
         container[Columns.type] = tag.type
         container[Columns.protocol] = tag.protocol
         container[Columns.jettonAddress] = tag.jettonAddress

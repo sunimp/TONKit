@@ -1,8 +1,7 @@
 //
 //  TonTransfer.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -13,25 +12,38 @@ import TonSwift
 // MARK: - TonTransfer
 
 public class TonTransfer: Action {
-    public let sender: WalletAccount
-    public let recipient: WalletAccount
-    public let amount: Int64
-    public let comment: String?
-
-    init(eventId: String, index: Int, sender: WalletAccount, recipient: WalletAccount, amount: Int64, comment: String?) {
-        self.sender = sender
-        self.recipient = recipient
-        self.amount = amount
-        self.comment = comment
-
-        super.init(eventId: eventId, index: index)
-    }
+    // MARK: Nested Types
 
     enum CodingKeys: String, CodingKey {
         case sender
         case recipient
         case amount
         case comment
+    }
+
+    // MARK: Properties
+
+    public let sender: WalletAccount
+    public let recipient: WalletAccount
+    public let amount: Int64
+    public let comment: String?
+
+    // MARK: Lifecycle
+
+    init(
+        eventID: String,
+        index: Int,
+        sender: WalletAccount,
+        recipient: WalletAccount,
+        amount: Int64,
+        comment: String?
+    ) {
+        self.sender = sender
+        self.recipient = recipient
+        self.amount = amount
+        self.comment = comment
+
+        super.init(eventID: eventID, index: index)
     }
 
     required init(from decoder: Decoder) throws {

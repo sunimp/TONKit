@@ -1,8 +1,7 @@
 //
 //  SyncTimer.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Combine
@@ -22,6 +21,8 @@ protocol ISyncTimerDelegate: AnyObject {
 // MARK: - SyncTimer
 
 class SyncTimer {
+    // MARK: Properties
+
     weak var delegate: ISyncTimerDelegate?
 
     private let reachabilityManager: ReachabilityManager
@@ -32,6 +33,8 @@ class SyncTimer {
     private var isStarted = false
     private var timer: Timer?
 
+    // MARK: Computed Properties
+
     private(set) var state: State = .notReady(error: Kit.SyncError.notStarted) {
         didSet {
             if state != oldValue {
@@ -39,6 +42,8 @@ class SyncTimer {
             }
         }
     }
+
+    // MARK: Lifecycle
 
     init(reachabilityManager: ReachabilityManager, syncInterval: TimeInterval) {
         self.reachabilityManager = reachabilityManager
@@ -54,6 +59,8 @@ class SyncTimer {
     deinit {
         stop()
     }
+
+    // MARK: Functions
 
     @objc
     func onFireTimer() {
@@ -112,10 +119,12 @@ extension SyncTimer {
         case ready
         case notReady(error: Error)
 
+        // MARK: Static Functions
+
         public static func == (lhs: State, rhs: State) -> Bool {
             switch (lhs, rhs) {
             case (.ready, .ready): return true
-            case (.notReady(let lhsError), .notReady(let rhsError)): return "\(lhsError)" == "\(rhsError)"
+            case let (.notReady(lhsError), .notReady(rhsError)): return "\(lhsError)" == "\(rhsError)"
             default: return false
             }
         }

@@ -35,7 +35,7 @@ class Manager {
         let tonKit = try Kit.instance(
             type: type,
             network: configuration.network,
-            walletId: "walletId",
+            walletID: "walletID",
             apiKey: nil,
             logger: logger
         )
@@ -107,14 +107,14 @@ class Manager {
 
 extension Manager {
     func login(words: [String]) throws {
-        try Kit.clear(exceptFor: ["walletId"])
+        try Kit.clear(exceptFor: ["walletID"])
 
         save(words: words)
         try initKit(words: words)
     }
 
     func watch(address: Address) throws {
-        try Kit.clear(exceptFor: ["walletId"])
+        try Kit.clear(exceptFor: ["walletID"])
 
         save(address: address.toRaw())
         try initKit(address: address)

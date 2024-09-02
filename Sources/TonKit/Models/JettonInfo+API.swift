@@ -1,8 +1,7 @@
 //
 //  JettonInfo+API.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -11,7 +10,6 @@ import TonAPI
 import TonSwift
 
 extension JettonInfo {
-    
     init(jettonPreview: TonAPI.JettonPreview) throws {
         let tokenAddress = try TonSwift.Address.parse(jettonPreview.address)
         address = tokenAddress
@@ -20,17 +18,17 @@ extension JettonInfo {
         symbol = jettonPreview.symbol
         imageURL = URL(string: jettonPreview.image)
 
-        let verification: JettonInfo.Verification
-        switch jettonPreview.verification {
-        case .whitelist:
-            verification = .whitelist
-        case .blacklist:
-            verification = .blacklist
-        case ._none:
-            verification = .none
-        case .unknownDefaultOpenApi:
-            verification = .unknown
-        }
+        let verification: JettonInfo.Verification =
+            switch jettonPreview.verification {
+            case .whitelist:
+                .whitelist
+            case .blacklist:
+                .blacklist
+            case ._none:
+                .none
+            case .unknownDefaultOpenApi:
+                .unknown
+            }
         self.verification = verification
     }
 }

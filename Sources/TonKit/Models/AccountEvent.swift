@@ -1,8 +1,7 @@
 //
 //  AccountEvent.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -10,7 +9,7 @@ import Foundation
 import GRDB
 
 public struct AccountEvent: Codable {
-    public let eventId: String
+    public let eventID: String
     public let timestamp: TimeInterval
     public let account: WalletAccount
     public let isScam: Bool

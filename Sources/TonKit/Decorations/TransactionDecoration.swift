@@ -1,8 +1,7 @@
 //
 //  TransactionDecoration.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -10,8 +9,12 @@ import Foundation
 import TonSwift
 
 open class TransactionDecoration {
+    // MARK: Lifecycle
+
     public init() { }
     public required init?(address _: Address, actions _: [Action]) { }
+
+    // MARK: Functions
 
     open func tags(userAddress _: Address) -> [TransactionTag] {
         []

@@ -1,8 +1,7 @@
 //
 //  FullBalance.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -47,8 +46,13 @@ public struct JettonItem: Codable, Equatable {
 // MARK: - TonInfo
 
 public struct TonInfo {
+    // MARK: Static Properties
+
     public static let name = "Toncoin"
     public static let symbol = "TON"
     public static let fractionDigits = 9
+
+    // MARK: Lifecycle
+
     private init() { }
 }

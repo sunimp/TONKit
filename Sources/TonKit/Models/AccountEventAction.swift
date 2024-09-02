@@ -1,8 +1,7 @@
 //
 //  AccountEventAction.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -12,13 +11,7 @@ import GRDB
 import TonSwift
 
 public class AccountEventAction: Codable {
-    let action: Action
-    let status: AccountEventStatus
-
-    init(action: Action, status: AccountEventStatus) {
-        self.action = action
-        self.status = status
-    }
+    // MARK: Nested Types
 
     struct ContractDeploy: Codable {
         let address: TonSwift.Address
@@ -138,5 +131,17 @@ public class AccountEventAction: Codable {
     struct Price: Codable {
         let amount: BigUInt
         let tokenName: String
+    }
+
+    // MARK: Properties
+
+    let action: Action
+    let status: AccountEventStatus
+
+    // MARK: Lifecycle
+
+    init(action: Action, status: AccountEventStatus) {
+        self.action = action
+        self.status = status
     }
 }

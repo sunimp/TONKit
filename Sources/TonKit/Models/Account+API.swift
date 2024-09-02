@@ -1,8 +1,7 @@
 //
 //  Account+API.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -11,7 +10,6 @@ import TonAPI
 import TonSwift
 
 extension Account {
-    
     init(account: TonAPI.Account) throws {
         address = try Address.parse(account.address)
         balance = account.balance

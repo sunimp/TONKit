@@ -1,8 +1,7 @@
 //
 //  AccountInfoManager.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -15,17 +14,23 @@ import WWExtensions
 // MARK: - AccountInfoManager
 
 class AccountInfoManager {
-    private let storage: AccountInfoStorage
+    // MARK: Properties
 
-    init(storage: AccountInfoStorage) {
-        self.storage = storage
-    }
+    private let storage: AccountInfoStorage
 
     private let tonBalanceSubject = PassthroughSubject<BigUInt, Never>()
     private let jettonBalanceSubject = PassthroughSubject<(Address, BigUInt), Never>()
 
+    // MARK: Computed Properties
+
     var tonBalance: BigUInt {
         storage.tonBalance ?? 0
+    }
+
+    // MARK: Lifecycle
+
+    init(storage: AccountInfoStorage) {
+        self.storage = storage
     }
 }
 

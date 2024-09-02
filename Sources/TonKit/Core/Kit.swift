@@ -1,8 +1,7 @@
 //
 //  Kit.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Combine
@@ -20,30 +19,33 @@ import WWToolKit
 // MARK: - Kit
 
 public class Kit {
-    static let tonId = "TON"
+    // MARK: Static Properties
 
-    static func jettonId(address: String) -> String { "TON/\(address)" }
-    static func address(jettonId: String) -> String { String(jettonId.dropFirst(4)) }
+    static let tonID = "TON"
 
-    var cancellables = Set<AnyCancellable>()
-    
-    private let syncer: Syncer
-    private let accountInfoManager: AccountInfoManager
-    private let transactionManager: TransactionManager
-    private let transactionSender: TransactionSender?
+    // MARK: Properties
 
     public let address: Address
     public let network: Network
-    public let uniqueId: String
+    public let uniqueID: String
     public let logger: Logger?
     
     @Published
     public var updateState = "idle"
 
+    var cancellables = Set<AnyCancellable>()
+
+    private let syncer: Syncer
+    private let accountInfoManager: AccountInfoManager
+    private let transactionManager: TransactionManager
+    private let transactionSender: TransactionSender?
+
+    // MARK: Lifecycle
+
     init(
         address: Address,
         network: Network,
-        uniqueId: String,
+        uniqueID: String,
         syncer: Syncer,
         accountInfoManager: AccountInfoManager,
         transactionManager: TransactionManager,
@@ -52,7 +54,7 @@ public class Kit {
     ) {
         self.address = address
         self.network = network
-        self.uniqueId = uniqueId
+        self.uniqueID = uniqueID
         self.syncer = syncer
         self.accountInfoManager = accountInfoManager
         self.transactionManager = transactionManager
@@ -63,6 +65,11 @@ public class Kit {
             self?.updateState = state
         }.store(in: &cancellables)
     }
+
+    // MARK: Static Functions
+
+    static func jettonID(address: String) -> String { "TON/\(address)" }
+    static func address(jettonID: String) -> String { String(jettonID.dropFirst(4)) }
 }
 
 // Public API Extension
@@ -108,18 +115,34 @@ extension Kit {
         transactionManager.fullTransactionsPublisher(tagQueries: tagQueries)
     }
 
-    public func transactions(tagQueries: [TransactionTagQuery], beforeLt: Int64? = nil, limit: Int? = nil) -> [FullTransaction] {
+    public func transactions(
+        tagQueries: [TransactionTagQuery],
+        beforeLt: Int64? = nil,
+        limit: Int? = nil
+    )
+        -> [FullTransaction] {
         transactionManager.fullTransactions(tagQueries: tagQueries, beforeLt: beforeLt, limit: limit)
     }
 
-    public func estimateFee(recipient: String, jetton: Jetton? = nil, amount: BigUInt, comment: String?) async throws -> Decimal {
+    public func estimateFee(
+        recipient: String,
+        jetton: Jetton? = nil,
+        amount: BigUInt,
+        comment: String?
+    ) async throws
+        -> Decimal {
         guard let transactionSender else {
             throw WalletError.watchOnly
         }
         let address = try FriendlyAddress(string: recipient)
         let amount = Amount(value: amount, isMax: amount == balance)
 
-        return try await transactionSender.estimatedFee(recipient: address, jetton: jetton, amount: amount, comment: comment)
+        return try await transactionSender.estimatedFee(
+            recipient: address,
+            jetton: jetton,
+            amount: amount,
+            comment: comment
+        )
     }
 
     public func send(recipient: String, jetton: Jetton? = nil, amount: BigUInt, comment: String?) async throws {
@@ -130,7 +153,12 @@ extension Kit {
         let address = try FriendlyAddress(string: recipient)
         let amount = Amount(value: amount, isMax: amount == balance)
 
-        return try await transactionSender.sendTransaction(recipient: address, jetton: jetton, amount: amount, comment: comment)
+        return try await transactionSender.sendTransaction(
+            recipient: address,
+            jetton: jetton,
+            amount: amount,
+            comment: comment
+        )
     }
 
     public func start() {
@@ -145,7 +173,7 @@ extension Kit {
         syncer.refresh()
     }
 
-    public func fetchTransaction(eventId _: String) async throws -> FullTransaction {
+    public func fetchTransaction(eventID _: String) async throws -> FullTransaction {
         throw SyncError.notStarted
     }
     
@@ -169,25 +197,26 @@ extension Kit {
     public static func instance(
         type: WalletType,
         network: Network,
-        walletId: String,
+        walletID: String,
         apiKey _: String?,
         logger: Logger?
-    ) throws -> Kit {
-        let uniqueId = "\(walletId)-\(network.rawValue)"
+    ) throws
+        -> Kit {
+        let uniqueID = "\(walletID)-\(network.rawValue)"
 
         let reachabilityManager = ReachabilityManager()
         let databaseDirectoryURL = try dataDirectoryURL()
         let syncerStorage = SyncerStorage(
             databaseDirectoryURL: databaseDirectoryURL,
-            databaseFileName: "syncer-state-storage-\(uniqueId)"
+            databaseFileName: "syncer-state-storage-\(uniqueID)"
         )
         let accountInfoStorage = AccountInfoStorage(
             databaseDirectoryURL: databaseDirectoryURL,
-            databaseFileName: "account-info-storage-\(uniqueId)"
+            databaseFileName: "account-info-storage-\(uniqueID)"
         )
         let transactionStorage = AccountEventStorage(
             databaseDirectoryURL: databaseDirectoryURL,
-            databaseFileName: "account-events-storage-\(uniqueId)"
+            databaseFileName: "account-events-storage-\(uniqueID)"
         )
 
         let address = try type.address()
@@ -232,7 +261,7 @@ extension Kit {
         }
 
         let kit = Kit(
-            address: address, network: network, uniqueId: uniqueId,
+            address: address, network: network, uniqueID: uniqueID,
             syncer: syncer,
             accountInfoManager: accountInfoManager,
             transactionManager: transactionManager,
@@ -276,19 +305,23 @@ extension Kit {
         case full(KeyPair)
         case watch(Address)
 
-        func address() throws -> Address {
-            switch self {
-            case .watch(let address): return address
-            case .full(let keyPair):
-                let wallet = WalletV4R2(publicKey: keyPair.publicKey.data)
-                return try wallet.address()
-            }
-        }
+        // MARK: Computed Properties
 
         var keyPair: KeyPair? {
             switch self {
-            case .full(let keyPair): return keyPair
+            case let .full(keyPair): return keyPair
             case .watch: return nil
+            }
+        }
+
+        // MARK: Functions
+
+        func address() throws -> Address {
+            switch self {
+            case let .watch(address): return address
+            case let .full(keyPair):
+                let wallet = WalletV4R2(publicKey: keyPair.publicKey.data)
+                return try wallet.address()
             }
         }
     }

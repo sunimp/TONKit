@@ -1,8 +1,7 @@
 //
 //  AccountEventRecord.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -12,20 +11,10 @@ import GRDB
 // MARK: - AccountEventRecord
 
 class AccountEventRecord: Record {
-    let eventId: String
-    let timestamp: TimeInterval
-    let accountUid: String
-    let isScam: Bool
-    let isInProgress: Bool
-    let fee: Int64
-    let lt: Int64
-
-    override class var databaseTableName: String {
-        return "account_event"
-    }
+    // MARK: Nested Types
 
     enum Columns: String, ColumnExpression {
-        case eventId
+        case eventID
         case timestamp
         case accountUid
         case isScam
@@ -34,8 +23,34 @@ class AccountEventRecord: Record {
         case lt
     }
 
-    init(eventId: String, timestamp: TimeInterval, accountUid: String, isScam: Bool, isInProgress: Bool, fee: Int64, lt: Int64) {
-        self.eventId = eventId
+    // MARK: Overridden Properties
+
+    override class var databaseTableName: String {
+        return "account_event"
+    }
+
+    // MARK: Properties
+
+    let eventID: String
+    let timestamp: TimeInterval
+    let accountUid: String
+    let isScam: Bool
+    let isInProgress: Bool
+    let fee: Int64
+    let lt: Int64
+
+    // MARK: Lifecycle
+
+    init(
+        eventID: String,
+        timestamp: TimeInterval,
+        accountUid: String,
+        isScam: Bool,
+        isInProgress: Bool,
+        fee: Int64,
+        lt: Int64
+    ) {
+        self.eventID = eventID
         self.timestamp = timestamp
         self.accountUid = accountUid
         self.isScam = isScam
@@ -47,7 +62,7 @@ class AccountEventRecord: Record {
     }
 
     required init(row: Row) throws {
-        eventId = row[Columns.eventId]
+        eventID = row[Columns.eventID]
         timestamp = row[Columns.timestamp]
         accountUid = row[Columns.accountUid]
         isScam = row[Columns.isScam]
@@ -58,8 +73,10 @@ class AccountEventRecord: Record {
         try super.init(row: row)
     }
 
+    // MARK: Overridden Functions
+
     override func encode(to container: inout PersistenceContainer) {
-        container[Columns.eventId] = eventId
+        container[Columns.eventID] = eventID
         container[Columns.timestamp] = timestamp
         container[Columns.accountUid] = accountUid
         container[Columns.isScam] = isScam
@@ -72,13 +89,17 @@ class AccountEventRecord: Record {
 extension Collection<AccountEventRecord> {
     func events(db: Database) throws -> [AccountEvent] {
         let accountUids = map { $0.accountUid }
-        let eventUids = map { $0.eventId }
+        let eventUids = map { $0.eventID }
         let account = try WalletAccountRecord.accounts(db: db, uids: Array(Set(accountUids)))
-        let actions = try ActionRecord.actions(db: db, eventIds: eventUids)
+        let actions = try ActionRecord.actions(db: db, eventIDs: eventUids)
 
         return compactMap { record -> AccountEvent? in
-            guard let account = account[record.accountUid] else { return nil }
-            guard let actions = actions[record.eventId], !actions.isEmpty else { return nil }
+            guard let account = account[record.accountUid] else {
+                return nil
+            }
+            guard let actions = actions[record.eventID], !actions.isEmpty else {
+                return nil
+            }
 
             return record.accountEvent(walletAccount: account, actions: actions.sorted())
         }
@@ -88,7 +109,7 @@ extension Collection<AccountEventRecord> {
 extension AccountEventRecord {
     func accountEvent(walletAccount: WalletAccount, actions: [Action]) -> AccountEvent {
         return AccountEvent(
-            eventId: eventId,
+            eventID: eventID,
             timestamp: timestamp,
             account: walletAccount,
             isScam: isScam,
@@ -101,7 +122,7 @@ extension AccountEventRecord {
 
     static func record(_ from: AccountEvent) -> AccountEventRecord {
         .init(
-            eventId: from.eventId,
+            eventID: from.eventID,
             timestamp: from.timestamp,
             accountUid: from.account.address.toRaw(),
             isScam: from.isScam,

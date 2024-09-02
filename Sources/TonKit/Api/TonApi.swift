@@ -1,8 +1,7 @@
 //
 //  TonApi.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -16,9 +15,13 @@ import TonSwift
 // MARK: - TonApi
 
 struct TonApi {
-    
-    private let urlSession: URLSession
+    // MARK: Properties
+
     let url: URL
+
+    private let urlSession: URLSession
+
+    // MARK: Lifecycle
 
     init(urlSession: URLSession, url: URL) {
         self.urlSession = urlSession
@@ -29,14 +32,16 @@ struct TonApi {
 // MARK: - Account
 
 extension TonApi {
-    
     func getAccountInfo(address: Address) async throws -> Account {
         let response = try await AccountsAPI.getAccount(accountId: address.toRaw())
         return try Account(account: response)
     }
 
     func getAccountJettonsBalances(address: Address, currencies: [String]) async throws -> [JettonBalance] {
-        let response = try await AccountsAPI.getAccountJettonsBalances(accountId: address.toRaw(), currencies: currencies)
+        let response = try await AccountsAPI.getAccountJettonsBalances(
+            accountId: address.toRaw(),
+            currencies: currencies
+        )
         return response.balances
             .compactMap { jetton in
                 do {
@@ -44,8 +49,7 @@ extension TonApi {
                     let walletAddress = try Address.parse(jetton.walletAddress.address)
                     let jettonInfo = try JettonInfo(jettonPreview: jetton.jetton)
                     let jettonItem = JettonItem(jettonInfo: jettonInfo, walletAddress: walletAddress)
-                    let jettonBalance = JettonBalance(item: jettonItem, quantity: quantity)
-                    return jettonBalance
+                    return JettonBalance(item: jettonItem, quantity: quantity)
                 } catch {
                     return nil
                 }
@@ -56,14 +60,14 @@ extension TonApi {
 //// MARK: - Events
 
 extension TonApi {
-    
     func getAccountEvents(
         address: Address,
         beforeLt: Int64?,
         limit: Int,
         start: Int64? = nil,
         end: Int64? = nil
-    ) async throws -> AccountEvents {
+    ) async throws
+        -> AccountEvents {
         let response = try await AccountsAPI.getAccountEvents(
             accountId: address.toRaw(),
             limit: limit,
@@ -72,7 +76,9 @@ extension TonApi {
             endDate: end
         )
         let events: [AccountEvent] = response.events.compactMap {
-            guard let activityEvent = try? AccountEvent(accountEvent: $0) else { return nil }
+            guard let activityEvent = try? AccountEvent(accountEvent: $0) else {
+                return nil
+            }
             return activityEvent
         }
         return AccountEvents(
@@ -90,7 +96,8 @@ extension TonApi {
         limit: Int,
         start: Int64? = nil,
         end: Int64? = nil
-    ) async throws -> AccountEvents {
+    ) async throws
+        -> AccountEvents {
         let response = try await AccountsAPI.getAccountJettonHistoryByID(
             accountId: address.toRaw(),
             jettonId: jettonInfo.address.toRaw(),
@@ -100,7 +107,9 @@ extension TonApi {
             endDate: end
         )
         let events: [AccountEvent] = response.events.compactMap {
-            guard let activityEvent = try? AccountEvent(accountEvent: $0) else { return nil }
+            guard let activityEvent = try? AccountEvent(accountEvent: $0) else {
+                return nil
+            }
             return activityEvent
         }
         return AccountEvents(
@@ -113,11 +122,12 @@ extension TonApi {
 
     func getEvent(
         address: Address,
-        eventId: String
-    ) async throws -> AccountEvent {
+        eventID: String
+    ) async throws
+        -> AccountEvent {
         let response = try await AccountsAPI.getAccountEvent(
             accountId: address.toRaw(),
-            eventId: eventId
+            eventId: eventID
         )
         return try AccountEvent(accountEvent: response)
     }
@@ -126,7 +136,6 @@ extension TonApi {
 // MARK: - Wallet
 
 extension TonApi {
-    
     func getSeqno(address: Address) async throws -> Int {
         try await WalletAPI.getAccountSeqno(accountId: address.toRaw()).seqno
     }
@@ -185,20 +194,19 @@ extension TonApi {
 // MARK: - Jettons
 
 extension TonApi {
-    
     func resolveJetton(address: Address) async throws -> JettonInfo {
         let response = try await JettonsAPI.getJettonInfo(accountId: address.toRaw())
-        let verification: JettonInfo.Verification
-        switch response.verification {
-        case ._none:
-            verification = .none
-        case .unknownDefaultOpenApi:
-            verification = .unknown
-        case .blacklist:
-            verification = .blacklist
-        case .whitelist:
-            verification = .whitelist
-        }
+        let verification: JettonInfo.Verification =
+            switch response.verification {
+            case ._none:
+                .none
+            case .unknownDefaultOpenApi:
+                .unknown
+            case .blacklist:
+                .blacklist
+            case .whitelist:
+                .whitelist
+            }
 
         return try JettonInfo(
             address: Address.parse(response.metadata.address),
@@ -214,7 +222,6 @@ extension TonApi {
 // MARK: - DNS
 
 extension TonApi {
-    
     enum DNSError: Swift.Error {
         case noWalletData
     }
@@ -231,13 +238,16 @@ extension TonApi {
     
     func getDomainExpirationDate(_ domainName: String) async throws -> Date? {
         let response = try await DNSAPI.getDnsInfo(domainName: domainName)
-        guard let expiringAt = response.expiringAt else { return nil }
+        guard let expiringAt = response.expiringAt else {
+            return nil
+        }
         return Date(timeIntervalSince1970: TimeInterval(integerLiteral: Int64(expiringAt)))
     }
 }
 
+// MARK: TonApi.APIError
+
 extension TonApi {
-    
     enum APIError: Swift.Error {
         case incorrectResponse
         case serverError(statusCode: Int)
@@ -247,7 +257,6 @@ extension TonApi {
 // MARK: - Time
 
 extension TonApi {
-    
     func time() async throws -> TimeInterval {
         let response = try await LiteServerAPI.getRawTime()
         return TimeInterval(response.time)

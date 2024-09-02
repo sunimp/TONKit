@@ -1,8 +1,7 @@
 //
 //  WalletAccountRecord.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -14,10 +13,29 @@ import TonSwift
 // MARK: - WalletAccountRecord
 
 class WalletAccountRecord: Record {
+    // MARK: Nested Types
+
+    enum Columns: String, ColumnExpression {
+        case uid
+        case name
+        case isScam
+        case isWallet
+    }
+
+    // MARK: Overridden Properties
+
+    override public class var databaseTableName: String {
+        "wallet_account"
+    }
+
+    // MARK: Properties
+
     let uid: String
     let name: String?
     let isScam: Bool
     let isWallet: Bool
+
+    // MARK: Lifecycle
 
     init(uid: String, name: String?, isScam: Bool, isWallet: Bool) {
         self.uid = uid
@@ -28,17 +46,6 @@ class WalletAccountRecord: Record {
         super.init()
     }
 
-    override public class var databaseTableName: String {
-        "wallet_account"
-    }
-
-    enum Columns: String, ColumnExpression {
-        case uid
-        case name
-        case isScam
-        case isWallet
-    }
-
     required init(row: Row) throws {
         uid = row[Columns.uid]
         name = row[Columns.name]
@@ -47,6 +54,8 @@ class WalletAccountRecord: Record {
 
         try super.init(row: row)
     }
+
+    // MARK: Overridden Functions
 
     override func encode(to container: inout PersistenceContainer) {
         container[Columns.uid] = uid

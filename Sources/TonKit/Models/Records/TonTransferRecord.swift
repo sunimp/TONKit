@@ -1,8 +1,7 @@
 //
 //  TonTransferRecord.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -13,7 +12,27 @@ import TonSwift
 // MARK: - TonTransferRecord
 
 class TonTransferRecord: Record {
-    let eventId: String
+    // MARK: Nested Types
+
+    enum Columns: String, ColumnExpression {
+        case eventID
+        case index
+        case lt
+        case senderUid
+        case recipientUid
+        case amount
+        case comment
+    }
+
+    // MARK: Overridden Properties
+
+    override class var databaseTableName: String {
+        return "ton_transfer"
+    }
+
+    // MARK: Properties
+
+    let eventID: String
     let index: Int
     let lt: Int64
     let senderUid: String
@@ -21,8 +40,18 @@ class TonTransferRecord: Record {
     let amount: Int64
     let comment: String?
 
-    init(eventId: String, index: Int, lt: Int64, senderUid: String, recipientUid: String, amount: Int64, comment: String?) {
-        self.eventId = eventId
+    // MARK: Lifecycle
+
+    init(
+        eventID: String,
+        index: Int,
+        lt: Int64,
+        senderUid: String,
+        recipientUid: String,
+        amount: Int64,
+        comment: String?
+    ) {
+        self.eventID = eventID
         self.index = index
         self.lt = lt
         self.senderUid = senderUid
@@ -33,22 +62,8 @@ class TonTransferRecord: Record {
         super.init()
     }
 
-    override class var databaseTableName: String {
-        return "ton_transfer"
-    }
-
-    enum Columns: String, ColumnExpression {
-        case eventId
-        case index
-        case lt
-        case senderUid
-        case recipientUid
-        case amount
-        case comment
-    }
-
     required init(row: Row) throws {
-        eventId = row[Columns.eventId]
+        eventID = row[Columns.eventID]
         index = row[Columns.index]
         lt = row[Columns.lt]
         senderUid = row[Columns.senderUid]
@@ -59,8 +74,10 @@ class TonTransferRecord: Record {
         try super.init(row: row)
     }
 
+    // MARK: Overridden Functions
+
     override func encode(to container: inout PersistenceContainer) {
-        container[Columns.eventId] = eventId
+        container[Columns.eventID] = eventID
         container[Columns.index] = index
         container[Columns.lt] = lt
         container[Columns.senderUid] = senderUid
@@ -73,7 +90,7 @@ class TonTransferRecord: Record {
 extension TonTransferRecord {
     func tonTransfer(sender: WalletAccount, recipient: WalletAccount) -> TonTransfer {
         .init(
-            eventId: eventId,
+            eventID: eventID,
             index: index,
             sender: sender,
             recipient: recipient,
@@ -84,7 +101,7 @@ extension TonTransferRecord {
 
     static func record(index: Int, lt: Int64, _ from: TonTransfer) -> TonTransferRecord {
         .init(
-            eventId: from.eventId,
+            eventID: from.eventID,
             index: index,
             lt: lt,
             senderUid: from.sender.address.toRaw(),

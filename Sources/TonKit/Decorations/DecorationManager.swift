@@ -1,8 +1,7 @@
 //
 //  DecorationManager.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -13,12 +12,18 @@ import TonSwift
 // MARK: - DecorationManager
 
 class DecorationManager {
+    // MARK: Properties
+
     private let userAddress: Address
     private var transactionDecorators = [ITransactionDecorator]()
+
+    // MARK: Lifecycle
 
     init(userAddress: Address) {
         self.userAddress = userAddress
     }
+
+    // MARK: Functions
 
     private func decoration(event: AccountEvent) -> TransactionDecoration {
         for decorator in transactionDecorators {

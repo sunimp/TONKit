@@ -1,8 +1,7 @@
 //
-//  Address.swift
-//  TonKit
+//  Address+GRDB.swift
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation

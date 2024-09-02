@@ -1,8 +1,7 @@
 //
 //  TransactionTag.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -13,10 +12,14 @@ import TonSwift
 // MARK: - TransactionTag
 
 public class TransactionTag {
+    // MARK: Properties
+
     public let type: TagType
     public let `protocol`: TagProtocol?
     public let jettonAddress: Address?
     public let addresses: [String]
+
+    // MARK: Lifecycle
 
     public init(type: TagType, protocol: TagProtocol? = nil, jettonAddress: Address? = nil, addresses: [String] = []) {
         self.type = type
@@ -24,6 +27,8 @@ public class TransactionTag {
         self.jettonAddress = jettonAddress
         self.addresses = addresses
     }
+
+    // MARK: Functions
 
     public func conforms(tagQuery: TransactionTagQuery) -> Bool {
         if let type = tagQuery.type, self.type != type {
@@ -57,7 +62,8 @@ extension TransactionTag: Hashable {
     }
 
     public static func == (lhs: TransactionTag, rhs: TransactionTag) -> Bool {
-        lhs.type == rhs.type && lhs.protocol == rhs.protocol && lhs.jettonAddress == rhs.jettonAddress && lhs.addresses == rhs
+        lhs.type == rhs.type && lhs.protocol == rhs.protocol && lhs.jettonAddress == rhs.jettonAddress && lhs
+            .addresses == rhs
             .addresses
     }
 }
@@ -67,13 +73,17 @@ extension TransactionTag {
         case native
         case jetton
 
+        // MARK: Computed Properties
+
         public var databaseValue: DatabaseValue {
             rawValue.databaseValue
         }
 
+        // MARK: Static Functions
+
         public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> TagProtocol? {
             switch dbValue.storage {
-            case .string(let string):
+            case let .string(string):
                 return TagProtocol(rawValue: string)
             default:
                 return nil
@@ -88,13 +98,17 @@ extension TransactionTag {
         case swap
         case contractCreation
 
+        // MARK: Computed Properties
+
         public var databaseValue: DatabaseValue {
             rawValue.databaseValue
         }
 
+        // MARK: Static Functions
+
         public static func fromDatabaseValue(_ dbValue: DatabaseValue) -> TagType? {
             switch dbValue.storage {
-            case .string(let string):
+            case let .string(string):
                 return TagType(rawValue: string)
             default:
                 return nil

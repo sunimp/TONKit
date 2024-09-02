@@ -1,8 +1,7 @@
 //
 //  TransactionTagQuery.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -10,10 +9,20 @@ import Foundation
 import TonSwift
 
 public class TransactionTagQuery {
+    // MARK: Properties
+
     public let type: TransactionTag.TagType?
     public let `protocol`: TransactionTag.TagProtocol?
     public let jettonAddress: Address?
     public let address: String?
+
+    // MARK: Computed Properties
+
+    var isEmpty: Bool {
+        type == nil && `protocol` == nil && jettonAddress == nil && address == nil
+    }
+
+    // MARK: Lifecycle
 
     public init(
         type: TransactionTag.TagType? = nil,
@@ -25,9 +34,5 @@ public class TransactionTagQuery {
         self.protocol = `protocol`
         self.jettonAddress = jettonAddress
         self.address = address
-    }
-
-    var isEmpty: Bool {
-        type == nil && `protocol` == nil && jettonAddress == nil && address == nil
     }
 }

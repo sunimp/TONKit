@@ -25,8 +25,8 @@ class TonAdapter {
         let transaction = fullTransaction.event
 
         return TransactionRecord(
-            transactionHash: transaction.eventId,
-            transactionHashData: transaction.eventId.ww.data,
+            transactionHash: transaction.eventID,
+            transactionHashData: transaction.eventID.ww.data,
             timestamp: Int(transaction.timestamp),
             isInProgress: transaction.isInProgress,
             lt: transaction.lt,
@@ -112,8 +112,8 @@ extension TonAdapter {
         return try await tonKit.estimateFee(recipient: recipient, jetton: jetton, amount: amount, comment: comment)
     }
 
-    func transaction(eventId: String) async throws -> FullTransaction {
-        try await tonKit.fetchTransaction(eventId: eventId)
+    func transaction(eventID: String) async throws -> FullTransaction {
+        try await tonKit.fetchTransaction(eventID: eventID)
     }
 
     func send(recipient: String, jetton: Jetton? = nil, amount: BigUInt, comment: String?) async throws {

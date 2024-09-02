@@ -1,8 +1,7 @@
 //
 //  AccountInfoStorage.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -14,16 +13,11 @@ import TonSwift
 // MARK: - AccountInfoStorage
 
 class AccountInfoStorage {
-    
+    // MARK: Properties
+
     private let dbPool: DatabasePool
 
-    init(databaseDirectoryURL: URL, databaseFileName: String) {
-        let databaseURL = databaseDirectoryURL.appendingPathComponent("\(databaseFileName).sqlite")
-
-        dbPool = try! DatabasePool(path: databaseURL.path)
-
-        try! migrator.migrate(dbPool)
-    }
+    // MARK: Computed Properties
 
     var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
@@ -38,19 +32,29 @@ class AccountInfoStorage {
 
         return migrator
     }
+
+    // MARK: Lifecycle
+
+    init(databaseDirectoryURL: URL, databaseFileName: String) {
+        let databaseURL = databaseDirectoryURL.appendingPathComponent("\(databaseFileName).sqlite")
+
+        dbPool = try! DatabasePool(path: databaseURL.path)
+
+        try! migrator.migrate(dbPool)
+    }
 }
 
 extension AccountInfoStorage {
     var tonBalance: BigUInt? {
         try! dbPool.read { db in
-            try Balance.filter(Balance.Columns.id == Kit.tonId).fetchOne(db)?.balance
+            try Balance.filter(Balance.Columns.id == Kit.tonID).fetchOne(db)?.balance
         }
     }
     
     var jettons: [Jetton] {
         try! dbPool.read { db in
             try Balance
-                .filter(Balance.Columns.id != Kit.tonId)
+                .filter(Balance.Columns.id != Kit.tonID)
                 .fetchAll(db)
                 .compactMap { Jetton(balance: $0) }
         }
@@ -58,13 +62,13 @@ extension AccountInfoStorage {
 
     func jettonBalance(address: String) -> BigUInt? {
         try! dbPool.read { db in
-            try Balance.filter(Balance.Columns.id == Kit.jettonId(address: address)).fetchOne(db)?.balance
+            try Balance.filter(Balance.Columns.id == Kit.jettonID(address: address)).fetchOne(db)?.balance
         }
     }
 
     func save(tonBalance: BigUInt) {
         _ = try! dbPool.write { db in
-            let balance = Balance(id: Kit.tonId, wallet: nil, balance: tonBalance)
+            let balance = Balance(id: Kit.tonID, wallet: nil, balance: tonBalance)
             try balance.insert(db)
         }
     }
@@ -73,7 +77,7 @@ extension AccountInfoStorage {
         _ = try! dbPool.write { db in
             for balance in jettonBalances {
                 let balance = Balance(
-                    id: Kit.jettonId(address: balance.item.jettonInfo.address.toRaw()),
+                    id: Kit.jettonID(address: balance.item.jettonInfo.address.toRaw()),
                     wallet: balance.item.walletAddress.toRaw(),
                     balance: balance.quantity
                 )
@@ -84,7 +88,7 @@ extension AccountInfoStorage {
 
     func clearJettonBalances() {
         _ = try! dbPool.write { db in
-            try Balance.filter(Balance.Columns.id != Kit.tonId).deleteAll(db)
+            try Balance.filter(Balance.Columns.id != Kit.tonID).deleteAll(db)
         }
     }
 }

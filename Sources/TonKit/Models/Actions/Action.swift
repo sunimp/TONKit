@@ -1,8 +1,7 @@
 //
 //  Action.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -20,11 +19,15 @@ protocol IActionRecord {
 // MARK: - Action
 
 public class Action: Codable {
-    public let eventId: String
+    // MARK: Properties
+
+    public let eventID: String
     public let index: Int
 
-    public init(eventId: String, index: Int) {
-        self.eventId = eventId
+    // MARK: Lifecycle
+
+    public init(eventID: String, index: Int) {
+        self.eventID = eventID
         self.index = index
     }
 }
@@ -37,6 +40,6 @@ extension Action: Comparable {
     }
 
     public static func == (lhs: Action, rhs: Action) -> Bool {
-        lhs.index == rhs.index && lhs.eventId == rhs.eventId
+        lhs.index == rhs.index && lhs.eventID == rhs.eventID
     }
 }

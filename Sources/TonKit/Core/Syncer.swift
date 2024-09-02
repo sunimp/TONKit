@@ -1,8 +1,7 @@
 //
 //  Syncer.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Combine
@@ -15,11 +14,21 @@ import WWToolKit
 // MARK: - Syncer
 
 class Syncer {
+    // MARK: Static Properties
+
     private static let avoidDoubleSyncInterval: TimeInterval = 3
-    private var cancellables = Set<AnyCancellable>()
-    private var tasks = Set<AnyTask>()
     private static let limitCount = 100
 
+    // MARK: Properties
+
+    @Published
+    public var updateState = "Idle"
+
+    @DistinctPublished
+    private(set) var state: SyncState = .notSynced(error: Kit.SyncError.notStarted)
+
+    private var cancellables = Set<AnyCancellable>()
+    private var tasks = Set<AnyTask>()
     private let accountInfoManager: AccountInfoManager
     private let transactionManager: TransactionManager
     private let reachabilityManager: ReachabilityManager
@@ -37,12 +46,7 @@ class Syncer {
     private var lastSynced: TimeInterval = 0
     private var syncing = false
 
-    
-    @Published
-    public var updateState = "Idle"
-
-    @DistinctPublished
-    private(set) var state: SyncState = .notSynced(error: Kit.SyncError.notStarted)
+    // MARK: Lifecycle
 
     deinit {
         backgroundUpdateStoreObservationToken?.cancel()
@@ -76,7 +80,9 @@ class Syncer {
             }
             .store(in: &cancellables)
     }
-    
+
+    // MARK: Functions
+
     private func handle(isReachable: Bool) {
         logger?.log(level: .debug, message: "Handle reachable \(isReachable)")
         if isReachable {
@@ -103,7 +109,7 @@ extension Syncer {
     private func subscribeUpdates() async {
         _ = await backgroundUpdateStore.addEventObserver(self) { [weak self] observer, state in
             switch state {
-            case .didUpdateState(let backgroundUpdateState):
+            case let .didUpdateState(backgroundUpdateState):
                 switch backgroundUpdateState {
                 case .connected:
                     Task { [weak self] in
@@ -126,9 +132,11 @@ extension Syncer {
                 default: break
                 }
 
-            case .didReceiveUpdateEvent(let backgroundUpdateEvent):
+            case let .didReceiveUpdateEvent(backgroundUpdateEvent):
                 Task { [weak self] in
-                    guard backgroundUpdateEvent.accountAddress == self?.address else { return }
+                    guard backgroundUpdateEvent.accountAddress == self?.address else {
+                        return
+                    }
                     self?.logger?.log(level: .debug, message: "Try Update from event background Update")
                     await observer.update(forced: true)
                 }
@@ -191,23 +199,23 @@ extension Syncer: ISyncTimerDelegate {
 
         var startTime = Int64(before.timestamp)
         repeat {
-            let newActions: AccountEvents
-            if let jettonInfo {
-                newActions = try await api.getAccountJettonEvents(
-                    address: address,
-                    jettonInfo: jettonInfo,
-                    beforeLt: nil,
-                    limit: Syncer.limitCount,
-                    start: startTime + 1
-                )
-            } else {
-                newActions = try await api.getAccountEvents(
-                    address: address,
-                    beforeLt: nil,
-                    limit: Syncer.limitCount,
-                    start: startTime + 1
-                )
-            }
+            let newActions: AccountEvents =
+                if let jettonInfo {
+                    try await api.getAccountJettonEvents(
+                        address: address,
+                        jettonInfo: jettonInfo,
+                        beforeLt: nil,
+                        limit: Syncer.limitCount,
+                        start: startTime + 1
+                    )
+                } else {
+                    try await api.getAccountEvents(
+                        address: address,
+                        beforeLt: nil,
+                        limit: Syncer.limitCount,
+                        start: startTime + 1
+                    )
+                }
             
             logger?.log(level: .debug, message: "==> Get new actions: \(newActions.events.count)")
             logger?.log(level: .debug, message: "From = \(newActions.startFrom)")
@@ -218,7 +226,7 @@ extension Syncer: ISyncTimerDelegate {
                 continue
             }
 
-            if transactionManager.event(address: address, eventId: last.eventId) != nil {
+            if transactionManager.event(address: address, eventID: last.eventID) != nil {
                 // fetched already existed transactions
                 completed = true
                 logger?.log(level: .debug, message: "=> parsed already exist txs")
@@ -236,7 +244,7 @@ extension Syncer: ISyncTimerDelegate {
             set(state: .syncing(progress: nil))
             sync()
 
-        case .notReady(let error):
+        case let .notReady(error):
             tasks = Set()
             set(state: .notSynced(error: error))
         }
@@ -247,7 +255,12 @@ extension Syncer: ISyncTimerDelegate {
             return try await api.getAccountEvents(address: address, beforeLt: beforeLt, limit: limit)
         }
         
-        return try await api.getAccountJettonEvents(address: address, jettonInfo: jettonInfo, beforeLt: beforeLt, limit: limit)
+        return try await api.getAccountJettonEvents(
+            address: address,
+            jettonInfo: jettonInfo,
+            beforeLt: beforeLt,
+            limit: limit
+        )
     }
 
     private func getTransactions(jettonInfo: JettonInfo? = nil) async throws {
@@ -255,10 +268,12 @@ extension Syncer: ISyncTimerDelegate {
 
         if
             let newest = transactionManager
-                .newestEvent(jettonAddressUid: jettonInfo?.address.toRaw())
-        {
-            // todo: implement related on jettonAddress or tonAddress
-            logger?.log(level: .debug, message: "=> has newest: lt = \(newest.lt) | timestamp = \(newest.timestamp.description)")
+                .newestEvent(jettonAddressUid: jettonInfo?.address.toRaw()) {
+            // TODO: implement related on jettonAddress or tonAddress
+            logger?.log(
+                level: .debug,
+                message: "=> has newest: lt = \(newest.lt) | timestamp = \(newest.timestamp.description)"
+            )
 //             2. If we has last -> get all new transaction from now to last timestamp.
             logger?.log(level: .debug, message: "=> Try to check new txs:")
             try await checkNewTransactions(before: newest, jettonInfo: jettonInfo)
@@ -285,19 +300,18 @@ extension Syncer: ISyncTimerDelegate {
         repeat {
             logger?.log(level: .debug, message: "==> Ask new for: \(beforeLt ?? -1)")
 
-            var fetchResult: AccountEvents
-            if let jettonInfo {
-                fetchResult = try await api.getAccountJettonEvents(
-                    address: address,
-                    jettonInfo: jettonInfo,
-                    beforeLt: beforeLt,
-                    limit: Syncer.limitCount
-                )
-            } else {
-                fetchResult = try await api.getAccountEvents(address: address, beforeLt: beforeLt, limit: Syncer.limitCount)
-            }
+            let fetchResult: AccountEvents =
+                if let jettonInfo {
+                    try await api.getAccountJettonEvents(
+                        address: address,
+                        jettonInfo: jettonInfo,
+                        beforeLt: beforeLt,
+                        limit: Syncer.limitCount
+                    )
+                } else {
+                    try await api.getAccountEvents(address: address, beforeLt: beforeLt, limit: Syncer.limitCount)
+                }
             
-
             logger?.log(level: .debug, message: "==> Get new actions: \(fetchResult.events.count)")
 //            for event in fetchResult.events {
 //                logger?.log(level: .debug, message: "==> ==> Event: \(event.eventId) | \(event.lt) actions: \(event.actions.count)")
@@ -308,7 +322,7 @@ extension Syncer: ISyncTimerDelegate {
             beforeLt = fetchResult.nextFrom
 
             if fetchResult.events.isEmpty {
-                let id = jettonInfo.map { Kit.jettonId(address: $0.address.toRaw()) } ?? Kit.tonId
+                let id = jettonInfo.map { Kit.jettonID(address: $0.address.toRaw()) } ?? Kit.tonID
                 storage.save(api: api.url.absoluteString, id: id, initialSyncCompleted: true)
                 logger?.log(level: .debug, message: "Full sync Completed")
                 completed = true
@@ -359,5 +373,4 @@ extension Syncer: ISyncTimerDelegate {
             }
         }.store(in: &tasks)
     }
-    
 }

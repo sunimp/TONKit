@@ -1,8 +1,7 @@
 //
-//  JettonTransfer.swift
-//  TonKit
+//  JettonTransfer+API.swift
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/20.
 //
 
 import Foundation
@@ -12,7 +11,7 @@ import TonAPI
 import TonSwift
 
 extension JettonTransfer {
-    convenience init(eventId: String, index: Int, action: JettonTransferAction) throws {
+    convenience init(eventID: String, index: Int, action: JettonTransferAction) throws {
         let sender = try? action.sender.map { try WalletAccount(accountAddress: $0) }
         let recipient = try? action.recipient.map { try WalletAccount(accountAddress: $0) }
         let senderAddress = try Address.parse(action.sendersWallet)
@@ -24,7 +23,7 @@ extension JettonTransfer {
         let comment = action.comment
 
         self.init(
-            eventId: eventId,
+            eventID: eventID,
             index: index,
             sender: sender,
             recipient: recipient,

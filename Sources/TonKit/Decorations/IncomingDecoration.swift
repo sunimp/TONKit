@@ -1,8 +1,7 @@
 //
 //  IncomingDecoration.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -13,9 +12,13 @@ import TonSwift
 // MARK: - IncomingDecoration
 
 public class IncomingDecoration: TransactionDecoration {
+    // MARK: Properties
+
     public let from: Address
     public let value: BigUInt
     public let comment: String?
+
+    // MARK: Lifecycle
 
     init(from: Address, value: BigUInt, comment: String?) {
         self.from = from
@@ -29,9 +32,13 @@ public class IncomingDecoration: TransactionDecoration {
         let transfers = actions.compactMap { $0 as? TonTransfer }
 
         let amount = IncomingDecoration.incomingAmount(address: address, transfers: transfers)
-        guard amount > 0 else { return nil }
+        guard amount > 0 else {
+            return nil
+        }
 
-        guard let first = transfers.first(where: { $0.recipient.address == address }) else { return nil }
+        guard let first = transfers.first(where: { $0.recipient.address == address }) else {
+            return nil
+        }
 
         from = first.sender.address
         value = BigUInt(amount)
@@ -39,6 +46,8 @@ public class IncomingDecoration: TransactionDecoration {
 
         super.init(address: address, actions: actions)
     }
+
+    // MARK: Overridden Functions
 
     override public func tags(userAddress _: Address) -> [TransactionTag] {
         [

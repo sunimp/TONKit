@@ -1,8 +1,7 @@
 //
-//  AccountEvent+API.swift
-//  TonKit
+//  AccountEvents+API.swift
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -12,15 +11,14 @@ import TonAPI
 import TonSwift
 
 extension AccountEvent {
-    
     init(accountEvent: TonAPI.AccountEvent) throws {
         let account = try WalletAccount(accountAddress: accountEvent.account)
-        let actions = Action.from(eventId: accountEvent.eventId, actions: accountEvent.actions)
+        let actions = Action.from(eventID: accountEvent.eventId, actions: accountEvent.actions)
         guard !actions.isEmpty else {
             throw Action.MapError.unsupported
         }
         self.init(
-            eventId: accountEvent.eventId,
+            eventID: accountEvent.eventId,
             timestamp: TimeInterval(accountEvent.timestamp),
             account: account,
             isScam: accountEvent.isScam,

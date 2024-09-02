@@ -1,8 +1,7 @@
 //
 //  TransactionManager.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Combine
@@ -13,6 +12,8 @@ import TonSwift
 // MARK: - TransactionManager
 
 class TransactionManager {
+    // MARK: Properties
+
     private let userAddress: Address
     private let storage: AccountEventStorage
     private let decorationManager: DecorationManager
@@ -21,6 +22,8 @@ class TransactionManager {
         [(transaction: FullTransaction, tags: [TransactionTag])],
         Never
     >()
+
+    // MARK: Lifecycle
 
     init(userAddress: Address, storage: AccountEventStorage, decorationManager: DecorationManager) {
         self.userAddress = userAddress
@@ -33,20 +36,23 @@ extension TransactionManager {
     func fullTransactionsPublisher(tagQueries: [TransactionTagQuery]?) -> AnyPublisher<[FullTransaction], Never> {
         fullTransactionsWithTagsSubject
             .map { transactionsWithTags in
-                guard let tagQueries else { return transactionsWithTags.map { $0.transaction } }
+                guard let tagQueries else {
+                    return transactionsWithTags.map { $0.transaction }
+                }
                 return transactionsWithTags.compactMap { (
                     transaction: FullTransaction,
                     tags: [TransactionTag]
-                ) -> FullTransaction? in
-                    for tagQuery in tagQueries {
-                        for tag in tags {
-                            if tag.conforms(tagQuery: tagQuery) {
-                                return transaction
-                            }
+                )
+                    -> FullTransaction? in
+                for tagQuery in tagQueries {
+                    for tag in tags {
+                        if tag.conforms(tagQuery: tagQuery) {
+                            return transaction
                         }
                     }
+                }
 
-                    return nil
+                return nil
                 }
             }
             .filter { transactions in
@@ -60,7 +66,13 @@ extension TransactionManager {
         return decorationManager.decorate(events: events)
     }
 
-    func events(address _: Address, tagQueries: [TransactionTagQuery], beforeLt: Int64?, limit: Int?) -> [AccountEvent] {
+    func events(
+        address _: Address,
+        tagQueries: [TransactionTagQuery],
+        beforeLt: Int64?,
+        limit: Int?
+    )
+        -> [AccountEvent] {
         return storage.eventsBefore(tagQueries: tagQueries, lt: beforeLt, limit: limit)
     }
 
@@ -72,8 +84,8 @@ extension TransactionManager {
         storage.lastEventRecord(newest: false, jettonAddressUid: jettonAddressUid)
     }
 
-    func event(address _: Address, eventId: String) -> AccountEvent? {
-        storage.event(eventId: eventId)
+    func event(address _: Address, eventID: String) -> AccountEvent? {
+        storage.event(eventID: eventID)
     }
 
     func save(events: [AccountEvent]) {
@@ -94,7 +106,10 @@ extension TransactionManager {
 
         for fullTransaction in fullTransactions {
             let tags = fullTransaction.decoration.tags(userAddress: userAddress)
-            tagRecords.append(contentsOf: tags.map { TransactionTagRecord(eventId: fullTransaction.event.eventId, tag: $0) })
+            tagRecords.append(contentsOf: tags.map { TransactionTagRecord(
+                eventID: fullTransaction.event.eventID,
+                tag: $0
+            ) })
             fullTransactionsWithTags.append((transaction: fullTransaction, tags: tags))
         }
 

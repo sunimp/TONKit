@@ -1,8 +1,7 @@
 //
 //  TransactionBoc.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -36,7 +35,11 @@ struct TransferData {
 // MARK: - TransferBoc
 
 class TransferBoc: TransactionBoc {
+    // MARK: Properties
+
     let data: TransferData
+
+    // MARK: Lifecycle
 
     init(transferData: TransferData) {
         data = transferData
@@ -46,9 +49,13 @@ class TransferBoc: TransactionBoc {
 // MARK: - TonTransferBoc
 
 class TonTransferBoc: TransferBoc {
+    // MARK: Lifecycle
+
     override init(transferData: TransferData) {
         super.init(transferData: transferData)
     }
+
+    // MARK: Overridden Functions
 
     override func create() async throws -> String {
         return try await TonTransferMessageBuilder.sendTonTransfer(
@@ -69,12 +76,18 @@ class TonTransferBoc: TransferBoc {
 // MARK: - JettonTransferBoc
 
 class JettonTransferBoc: TransferBoc {
+    // MARK: Properties
+
     let jetton: Address
+
+    // MARK: Lifecycle
 
     init(jetton: Address, transferData: TransferData) {
         self.jetton = jetton
         super.init(transferData: transferData)
     }
+
+    // MARK: Overridden Functions
 
     override func create() async throws -> String {
         return try await TokenTransferMessageBuilder.sendTokenTransfer(

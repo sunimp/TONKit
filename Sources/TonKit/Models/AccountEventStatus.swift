@@ -1,8 +1,7 @@
 //
 //  AccountEventStatus.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -14,20 +13,14 @@ enum AccountEventStatus: Codable, DatabaseValueConvertible {
     case failed
     case unknown(String)
 
+    // MARK: Computed Properties
+
     var rawValue: String? {
         switch self {
         case .ok: return nil
         case .failed: return "Failed"
-        case .unknown(let value):
+        case let .unknown(value):
             return value
-        }
-    }
-
-    init(rawValue: String) {
-        switch rawValue {
-        case "ok": self = .ok
-        case "failed": self = .failed
-        default: self = .unknown(rawValue)
         }
     }
 
@@ -35,6 +28,16 @@ enum AccountEventStatus: Codable, DatabaseValueConvertible {
         switch self {
         case .ok: return true
         default: return false
+        }
+    }
+
+    // MARK: Lifecycle
+
+    init(rawValue: String) {
+        switch rawValue {
+        case "ok": self = .ok
+        case "failed": self = .failed
+        default: self = .unknown(rawValue)
         }
     }
 }

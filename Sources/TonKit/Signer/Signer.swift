@@ -1,8 +1,7 @@
 //
 //  Signer.swift
-//  TonKit
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/6/13.
 //
 
 import Foundation
@@ -17,11 +16,17 @@ import WWToolKit
 // MARK: - Signer
 
 public class Signer {
+    // MARK: Properties
+
     private let privateKey: Data
+
+    // MARK: Lifecycle
 
     init(privateKey: Data) {
         self.privateKey = privateKey
     }
+
+    // MARK: Functions
 
     func signature(hash: Data) throws -> Data {
         try Crypto.ellipticSign(hash, privateKey: privateKey)

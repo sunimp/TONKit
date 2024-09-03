@@ -1,6 +1,6 @@
 //
 //  TransactionsController.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //

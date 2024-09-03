@@ -1,5 +1,5 @@
 //
-//  TonTransfer.swift
+//  TONTransfer.swift
 //
 //  Created by Sun on 2024/6/13.
 //
@@ -9,9 +9,9 @@ import Foundation
 import GRDB
 import TonSwift
 
-// MARK: - TonTransfer
+// MARK: - TONTransfer
 
-public class TonTransfer: Action {
+public class TONTransfer: Action {
     // MARK: Nested Types
 
     enum CodingKeys: String, CodingKey {
@@ -59,9 +59,9 @@ public class TonTransfer: Action {
 
 // MARK: IActionRecord
 
-extension TonTransfer: IActionRecord {
+extension TONTransfer: IActionRecord {
     func save(db: Database, index: Int, lt: Int64) throws {
-        try TonTransferRecord.record(index: index, lt: lt, self).save(db)
+        try TONTransferRecord.record(index: index, lt: lt, self).save(db)
         try WalletAccountRecord.record(recipient).save(db)
         try WalletAccountRecord.record(sender).save(db)
     }

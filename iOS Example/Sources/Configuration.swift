@@ -1,6 +1,6 @@
 //
 //  Configuration.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 
 import WWToolKit
-import TonKit
+import TONKit
 
 class Configuration {
     static let shared = Configuration()

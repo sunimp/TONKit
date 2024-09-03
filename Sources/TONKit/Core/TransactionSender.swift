@@ -14,14 +14,14 @@ import TonSwift
 class TransactionSender {
     // MARK: Properties
 
-    private let api: TonApi
+    private let api: TONApi
     private let contract: WalletContract
     private let sender: Address
     private let secretKey: Data
 
     // MARK: Lifecycle
 
-    init(api: TonApi, contract: WalletContract, sender: Address, secretKey: Data) {
+    init(api: TONApi, contract: WalletContract, sender: Address, secretKey: Data) {
         self.api = api
         self.contract = contract
         self.sender = sender
@@ -74,7 +74,7 @@ extension TransactionSender {
                 if let jetton {
                     try await JettonTransferBoc(jetton: jetton.walletAddress, transferData: data).create()
                 } else {
-                    try await TonTransferBoc(transferData: data).create()
+                    try await TONTransferBoc(transferData: data).create()
                 }
             
             let transactionInfo = try await api.emulateMessageWallet(boc: boc)
@@ -115,7 +115,7 @@ extension TransactionSender {
             if let jetton {
                 try await JettonTransferBoc(jetton: jetton.walletAddress, transferData: data).create()
             } else {
-                try await TonTransferBoc(transferData: data).create()
+                try await TONTransferBoc(transferData: data).create()
             }
 
         try await api.sendTransaction(boc: boc)

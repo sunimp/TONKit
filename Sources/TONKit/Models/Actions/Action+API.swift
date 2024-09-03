@@ -26,7 +26,7 @@ extension Action {
 
     static func instance(eventID: String, index: Int, action: TonAPI.Action) throws -> Action {
         if let tonTransfer = action.tonTransfer {
-            return try TonTransfer(eventID: eventID, index: index, action: tonTransfer)
+            return try TONTransfer(eventID: eventID, index: index, action: tonTransfer)
         }
         if let jettonTransfer = action.jettonTransfer {
             return try JettonTransfer(eventID: eventID, index: index, action: jettonTransfer)

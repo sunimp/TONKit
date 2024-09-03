@@ -34,7 +34,7 @@ public class OutgoingDecoration: TransactionDecoration {
 
     required init?(address: Address, actions: [Action]) {
         // Maybe we need to make array of decorations (one decoraction for each different recipient address)
-        let transfers = actions.compactMap { $0 as? TonTransfer }
+        let transfers = actions.compactMap { $0 as? TONTransfer }
 
         let amount = IncomingDecoration.incomingAmount(address: address, transfers: transfers)
         guard amount <= 0 else {

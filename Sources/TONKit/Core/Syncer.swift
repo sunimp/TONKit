@@ -33,7 +33,7 @@ class Syncer {
     private let transactionManager: TransactionManager
     private let reachabilityManager: ReachabilityManager
 
-    private let api: TonApi
+    private let api: TONApi
 
     private var backgroundUpdateStoreObservationToken: ObservationToken?
     private let backgroundUpdateStore: BackgroundUpdateStore
@@ -59,7 +59,7 @@ class Syncer {
         accountInfoManager: AccountInfoManager,
         transactionManager: TransactionManager,
         reachabilityManager: ReachabilityManager,
-        api: TonApi,
+        api: TONApi,
         backgroundUpdateStore: BackgroundUpdateStore,
         storage: SyncerStorage,
         address: Address,

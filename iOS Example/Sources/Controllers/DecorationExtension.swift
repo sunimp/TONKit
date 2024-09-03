@@ -1,13 +1,13 @@
 //
 //  DecorationExtension.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //
 
 import Foundation
 
-import TonKit
+import TONKit
 import TonSwift
 
 private func shortAddress(address: Address) -> String {

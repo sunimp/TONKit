@@ -223,10 +223,10 @@ extension Kit {
         let decorationManager = DecorationManager(userAddress: address)
 
         let serverURL = URL(string: "https://tonapi.io")!
-        var transport = TonTransport()
+        var transport = TONTransport()
         
         let urlSession = URLSession(configuration: transport.urlSessionConfiguration)
-        let api = TonApi(urlSession: urlSession, url: serverURL)
+        let api = TONApi(urlSession: urlSession, url: serverURL)
 
         let accountInfoManager = AccountInfoManager(storage: accountInfoStorage)
         let transactionManager = TransactionManager(

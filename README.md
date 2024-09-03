@@ -1,6 +1,6 @@
-# TonKit.Swift
+# TONKit.Swift
 
-`TonKit.Swift` is a native(Swift) toolkit for TON network. it's based on TonKeeper libraries.
+`TONKit.Swift` is a native(Swift) toolkit for TON network. it's based on TonKeeper libraries.
 
 ## Core Features
 
@@ -13,16 +13,16 @@
 
 ### Initialization
 
-First you need to initialize an `TonKit.Kit` instance
+First you need to initialize an `TONKit.Kit` instance
 
 ```swift
-import TonKit
+import TONKit
 
 //from TonSwift library
 let address = try FriedlyAddress(string: "0x...")
 
 
-let TonKit = try Kit.instance(
+let TONKit = try Kit.instance(
     type: .watch(address), 
     network: .mainnet, 
     walletID: "unique_wallet_id", 
@@ -32,11 +32,11 @@ let TonKit = try Kit.instance(
 
 ### Starting and Stopping
 
-`TonKit.Kit` instance requires to be started with `start` command. This start the process of synchronization with the blockchain state.
+`TONKit.Kit` instance requires to be started with `start` command. This start the process of synchronization with the blockchain state.
 
 ```swift
-TonKit.start()
-TonKit.stop()
+TONKit.start()
+TONKit.stop()
 ```
 ## Requirements
 
@@ -52,7 +52,7 @@ TonKit.stop()
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/sunimp/TonKit.Swift.git", .upToNextMajor(from: "0.6.0"))
+    .package(url: "https://github.com/sunimp/TONKit.Swift.git", .upToNextMajor(from: "0.6.0"))
 ]
 ```
 
@@ -62,5 +62,5 @@ All features of the library are used in example project located in `iOS Example`
 
 ## License
 
-The `TonKit.Swift` toolkit is open source and available under the terms of the [MIT License](https://github.com/sunimp/TonKit.Swift/blob/master/LICENSE).
+The `TONKit.Swift` toolkit is open source and available under the terms of the [MIT License](https://github.com/sunimp/TONKit.Swift/blob/master/LICENSE).
 

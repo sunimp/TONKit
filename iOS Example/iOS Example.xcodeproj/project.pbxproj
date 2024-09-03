@@ -11,8 +11,8 @@
 		6BB14F692BF3846400E879B2 /* JettonSendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB14F682BF3846400E879B2 /* JettonSendController.swift */; };
 		6BB14F6E2BFB1D4900E879B2 /* TonAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BB14F6D2BFB1D4900E879B2 /* TonAdapter.swift */; };
 		6BD5ACB92C22D21700F51644 /* BalanceCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD5ACB82C22D21700F51644 /* BalanceCell.swift */; };
-		6BDDB59E2C19AD5700DE9D56 /* TonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6BDDB59D2C19AD5700DE9D56 /* TonKit */; };
 		A4625CEE2C840E7B0062F4CB /* UIExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = A4625CED2C840E7B0062F4CB /* UIExtensions */; };
+		A4D997802C86A79C00229C75 /* TONKit in Frameworks */ = {isa = PBXBuildFile; productRef = A4D9977F2C86A79C00229C75 /* TONKit */; };
 		D023D24B2A20C524004F65B0 /* BalanceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D023D2422A20C524004F65B0 /* BalanceController.swift */; };
 		D023D2582A20C658004F65B0 /* DecorationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D023D2572A20C658004F65B0 /* DecorationExtension.swift */; };
 		D023D25A2A20C97D004F65B0 /* SendController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D023D2592A20C97D004F65B0 /* SendController.swift */; };
@@ -31,7 +31,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		607FACD01AFB9204008FA782 /* TonKit Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TonKit Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		607FACD01AFB9204008FA782 /* TONKit Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "TONKit Demo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		607FACD41AFB9204008FA782 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		607FACD51AFB9204008FA782 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6BB14F682BF3846400E879B2 /* JettonSendController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JettonSendController.swift; sourceTree = "<group>"; };
@@ -60,7 +60,7 @@
 				D36DFC2928EBDF5B00D2FC62 /* SnapKit in Frameworks */,
 				D3F4CFF328EAE791002DB520 /* RxSwift in Frameworks */,
 				A4625CEE2C840E7B0062F4CB /* UIExtensions in Frameworks */,
-				6BDDB59E2C19AD5700DE9D56 /* TonKit in Frameworks */,
+				A4D997802C86A79C00229C75 /* TONKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,7 +79,7 @@
 		607FACD11AFB9204008FA782 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				607FACD01AFB9204008FA782 /* TonKit Demo.app */,
+				607FACD01AFB9204008FA782 /* TONKit Demo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -175,11 +175,11 @@
 			packageProductDependencies = (
 				D3F4CFF228EAE791002DB520 /* RxSwift */,
 				D36DFC2828EBDF5B00D2FC62 /* SnapKit */,
-				6BDDB59D2C19AD5700DE9D56 /* TonKit */,
 				A4625CED2C840E7B0062F4CB /* UIExtensions */,
+				A4D9977F2C86A79C00229C75 /* TONKit */,
 			);
 			productName = TonKit;
-			productReference = 607FACD01AFB9204008FA782 /* TonKit Demo.app */;
+			productReference = 607FACD01AFB9204008FA782 /* TONKit Demo.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -384,7 +384,7 @@
 				);
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sunimp.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "TonKit Demo";
+				PRODUCT_NAME = "TONKit Demo";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -407,7 +407,7 @@
 				);
 				MODULE_NAME = ExampleApp;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.sunimp.$(PRODUCT_NAME:rfc1034identifier)";
-				PRODUCT_NAME = "TonKit Demo";
+				PRODUCT_NAME = "TONKit Demo";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -468,14 +468,14 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6BDDB59D2C19AD5700DE9D56 /* TonKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = TonKit;
-		};
 		A4625CED2C840E7B0062F4CB /* UIExtensions */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A4625CEC2C840E7B0062F4CB /* XCRemoteSwiftPackageReference "UIExtensions.Swift" */;
 			productName = UIExtensions;
+		};
+		A4D9977F2C86A79C00229C75 /* TONKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TONKit;
 		};
 		D36DFC2828EBDF5B00D2FC62 /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;

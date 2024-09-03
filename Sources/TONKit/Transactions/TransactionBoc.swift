@@ -46,9 +46,9 @@ class TransferBoc: TransactionBoc {
     }
 }
 
-// MARK: - TonTransferBoc
+// MARK: - TONTransferBoc
 
-class TonTransferBoc: TransferBoc {
+class TONTransferBoc: TransferBoc {
     // MARK: Lifecycle
 
     override init(transferData: TransferData) {
@@ -58,7 +58,7 @@ class TonTransferBoc: TransferBoc {
     // MARK: Overridden Functions
 
     override func create() async throws -> String {
-        return try await TonTransferMessageBuilder.sendTonTransfer(
+        return try await TONTransferMessageBuilder.sendTONTransfer(
             contract: data.contract,
             sender: data.sender,
             seqno: data.seqno,

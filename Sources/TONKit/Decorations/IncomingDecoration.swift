@@ -29,7 +29,7 @@ public class IncomingDecoration: TransactionDecoration {
     }
 
     required init?(address: Address, actions: [Action]) {
-        let transfers = actions.compactMap { $0 as? TonTransfer }
+        let transfers = actions.compactMap { $0 as? TONTransfer }
 
         let amount = IncomingDecoration.incomingAmount(address: address, transfers: transfers)
         guard amount > 0 else {
@@ -68,7 +68,7 @@ extension IncomingDecoration: CustomStringConvertible {
         ].compactMap { $0 }.joined(separator: "|")
     }
     
-    static func incomingAmount(address: Address, transfers: [TonTransfer]) -> Int64 {
+    static func incomingAmount(address: Address, transfers: [TONTransfer]) -> Int64 {
         let incoming = transfers.filter { $0.recipient.address == address }
         let outgoing = transfers.filter { $0.sender.address == address }
             

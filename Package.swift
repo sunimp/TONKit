@@ -2,15 +2,15 @@
 import PackageDescription
 
 let package = Package(
-    name: "TonKit",
+    name: "TONKit",
     platforms: [
         .iOS(.v14),
         .macOS(.v12)
     ],
     products: [
         .library(
-            name: "TonKit",
-            targets: ["TonKit"]
+            name: "TONKit",
+            targets: ["TONKit"]
         ),
     ],
     dependencies: [
@@ -29,7 +29,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "TonKit",
+            name: "TONKit",
             dependencies: [
                 "BigInt",
                 .product(name: "Socket", package: "BlueSocket"),

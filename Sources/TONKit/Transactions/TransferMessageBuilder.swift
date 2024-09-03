@@ -9,16 +9,16 @@ import Foundation
 import BigInt
 import TonSwift
 
-// MARK: - TonTransferMessageBuilder
+// MARK: - TONTransferMessageBuilder
 
-public struct TonTransferMessageBuilder {
+public struct TONTransferMessageBuilder {
     // MARK: Lifecycle
 
     private init() { }
 
     // MARK: Static Functions
 
-    public static func sendTonTransfer(
+    public static func sendTONTransfer(
         contract: WalletContract,
         sender: Address,
         seqno: UInt64,

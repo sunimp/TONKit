@@ -62,18 +62,18 @@ class AccountEventStorage {
             }
         }
 
-        migrator.registerMigration("create TonTransfer") { db in
-            try db.create(table: TonTransferRecord.databaseTableName) { t in
-                t.column(TonTransferRecord.Columns.eventID.name, .text).notNull()
-                t.column(TonTransferRecord.Columns.index.name, .integer).notNull()
-                t.column(TonTransferRecord.Columns.lt.name, .integer).notNull()
-                t.column(TonTransferRecord.Columns.senderUid.name, .text).notNull()
-                t.column(TonTransferRecord.Columns.recipientUid.name, .text).notNull()
-                t.column(TonTransferRecord.Columns.amount.name, .integer).notNull()
-                t.column(TonTransferRecord.Columns.comment.name, .text)
+        migrator.registerMigration("create TONTransfer") { db in
+            try db.create(table: TONTransferRecord.databaseTableName) { t in
+                t.column(TONTransferRecord.Columns.eventID.name, .text).notNull()
+                t.column(TONTransferRecord.Columns.index.name, .integer).notNull()
+                t.column(TONTransferRecord.Columns.lt.name, .integer).notNull()
+                t.column(TONTransferRecord.Columns.senderUid.name, .text).notNull()
+                t.column(TONTransferRecord.Columns.recipientUid.name, .text).notNull()
+                t.column(TONTransferRecord.Columns.amount.name, .integer).notNull()
+                t.column(TONTransferRecord.Columns.comment.name, .text)
 
                 t.primaryKey(
-                    [TonTransferRecord.Columns.eventID.name, TonTransferRecord.Columns.index.name],
+                    [TONTransferRecord.Columns.eventID.name, TONTransferRecord.Columns.index.name],
                     onConflict: .replace
                 )
             }
@@ -260,8 +260,8 @@ extension AccountEventStorage {
                     .fetchOne(db)
             }
             guard
-                let record = try TonTransferRecord
-                    .order(newest ? TonTransferRecord.Columns.lt.desc : TonTransferRecord.Columns.lt.asc)
+                let record = try TONTransferRecord
+                    .order(newest ? TONTransferRecord.Columns.lt.desc : TONTransferRecord.Columns.lt.asc)
                     .fetchOne(db)
             else {
                 return nil

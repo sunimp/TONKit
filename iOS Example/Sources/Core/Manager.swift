@@ -1,6 +1,6 @@
 //
 //  Manager.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //
@@ -8,7 +8,7 @@
 import Foundation
 
 import HDWalletKit
-import TonKit
+import TONKit
 import TonSwift
 import TweetNacl
 import WWToolKit

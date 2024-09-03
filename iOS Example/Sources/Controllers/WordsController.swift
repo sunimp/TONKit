@@ -1,6 +1,6 @@
 //
 //  WordsController.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //
@@ -9,7 +9,7 @@ import UIKit
 
 import HDWalletKit
 import SnapKit
-import TonKit
+import TONKit
 import TonSwift
 import UIExtensions
 
@@ -29,7 +29,7 @@ class WordsController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        title = "TonKit Demo"
+        title = "TONKit Demo"
 
         let wordsDescriptionLabel = UILabel()
 

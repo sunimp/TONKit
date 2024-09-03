@@ -1,6 +1,6 @@
 //
 //  TonAdapter.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //
@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 import BigInt
-import TonKit
+import TONKit
 import TonSwift
 import WWExtensions
 

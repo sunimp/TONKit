@@ -1,5 +1,5 @@
 //
-//  TonTransferRecord.swift
+//  TONTransferRecord.swift
 //
 //  Created by Sun on 2024/6/13.
 //
@@ -9,9 +9,9 @@ import Foundation
 import GRDB
 import TonSwift
 
-// MARK: - TonTransferRecord
+// MARK: - TONTransferRecord
 
-class TonTransferRecord: Record {
+class TONTransferRecord: Record {
     // MARK: Nested Types
 
     enum Columns: String, ColumnExpression {
@@ -87,8 +87,8 @@ class TonTransferRecord: Record {
     }
 }
 
-extension TonTransferRecord {
-    func tonTransfer(sender: WalletAccount, recipient: WalletAccount) -> TonTransfer {
+extension TONTransferRecord {
+    func tonTransfer(sender: WalletAccount, recipient: WalletAccount) -> TONTransfer {
         .init(
             eventID: eventID,
             index: index,
@@ -99,7 +99,7 @@ extension TonTransferRecord {
         )
     }
 
-    static func record(index: Int, lt: Int64, _ from: TonTransfer) -> TonTransferRecord {
+    static func record(index: Int, lt: Int64, _ from: TONTransfer) -> TONTransferRecord {
         .init(
             eventID: from.eventID,
             index: index,

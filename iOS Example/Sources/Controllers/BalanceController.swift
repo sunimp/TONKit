@@ -1,6 +1,6 @@
 //
 //  WordsController.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //
@@ -9,7 +9,7 @@ import Combine
 import UIKit
 
 import SnapKit
-import TonKit
+import TONKit
 import TonSwift
 import UIExtensions
 

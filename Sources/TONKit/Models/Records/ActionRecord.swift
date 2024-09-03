@@ -16,7 +16,7 @@ enum ActionRecord {
         // Collect all actions for every eventID
 
         // 1.1.1 Get transfers for all events
-        let tonTransfersRecords = try TonTransferRecord.filter(eventIDs.contains(TonTransferRecord.Columns.eventID))
+        let tonTransfersRecords = try TONTransferRecord.filter(eventIDs.contains(TONTransferRecord.Columns.eventID))
             .fetchAll(db)
         let jettonTransfersRecords = try JettonTransferRecord
             .filter(eventIDs.contains(JettonTransferRecord.Columns.eventID))

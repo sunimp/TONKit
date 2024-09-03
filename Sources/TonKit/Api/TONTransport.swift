@@ -1,5 +1,5 @@
 //
-//  TonTransport.swift
+//  TONTransport.swift
 //
 //  Created by Sun on 2024/6/13.
 //
@@ -9,7 +9,7 @@ import Foundation
 import StreamURLSessionTransport
 import TonAPI
 
-struct TonTransport {
+struct TONTransport {
     // MARK: Properties
 
     lazy var transport: StreamURLSessionTransport = .init(urlSessionConfiguration: urlSessionConfiguration)

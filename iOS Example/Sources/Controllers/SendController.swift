@@ -1,6 +1,6 @@
 //
 //  SendController.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //
@@ -11,7 +11,7 @@ import UIKit
 import BigInt
 import WWExtensions
 import SnapKit
-import TonKit
+import TONKit
 import TonSwift
 
 class SendController: UIViewController {

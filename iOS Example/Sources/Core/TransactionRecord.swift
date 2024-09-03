@@ -1,13 +1,13 @@
 //
 //  TransactionRecord.swift
-//  TonKit-Demo
+//  TONKit-Demo
 //
 //  Created by Sun on 2024/8/26.
 //
 
 import Foundation
 
-import TonKit
+import TONKit
 
 struct TransactionRecord {
     let transactionHash: String

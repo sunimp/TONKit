@@ -15,19 +15,19 @@ class EventStorage {
     // MARK: Properties
 
     private let dbPool: DatabasePool
-
+    
     // MARK: Computed Properties
 
     var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
-
+        
         migrator.registerMigration("Create eventSyncState") { db in
             try db.create(table: "eventSyncState", body: { t in
                 t.primaryKey(EventSyncState.Columns.id.name, .text, onConflict: .replace)
                 t.column(EventSyncState.Columns.allSynced.name, .boolean).notNull()
             })
         }
-
+        
         migrator.registerMigration("Create event") { db in
             try db.create(table: "event", body: { t in
                 t.primaryKey(Event.Columns.id.name, .text, onConflict: .replace)
@@ -39,7 +39,7 @@ class EventStorage {
                 t.column(Event.Columns.actions.name, .text).notNull()
             })
         }
-
+        
         migrator.registerMigration("Create tag") { db in
             try db.create(table: "tag", body: { t in
                 t.column(Tag.Columns.eventID.name, .text).notNull()
@@ -49,7 +49,7 @@ class EventStorage {
                 t.column(Tag.Columns.addresses.name, .text).notNull()
             })
         }
-
+        
         return migrator
     }
 
@@ -57,7 +57,7 @@ class EventStorage {
 
     init(dbPool: DatabasePool) throws {
         self.dbPool = dbPool
-
+        
         try migrator.migrate(dbPool)
     }
 }
@@ -68,13 +68,13 @@ extension EventStorage {
             try EventSyncState.fetchOne(db)
         }
     }
-
+    
     func events(tagQuery: TagQuery, beforeLt: Int64?, limit: Int) throws -> [Event] {
         try dbPool.read { db in
             var arguments = [DatabaseValueConvertible]()
             var whereConditions = [String]()
             var joinClause = ""
-
+            
             if !tagQuery.isEmpty {
                 if let type = tagQuery.type {
                     whereConditions.append("tag.'\(Tag.Columns.type.name)' = ?")
@@ -91,7 +91,7 @@ extension EventStorage {
                 if let address = tagQuery.address {
                     let encoder = JSONEncoder()
                     encoder.outputFormatting = .sortedKeys
-
+                    
                     do {
                         let addressData = try encoder.encode(address)
                         if let addressJson = String(data: addressData, encoding: .utf8) {
@@ -100,19 +100,19 @@ extension EventStorage {
                         }
                     } catch { }
                 }
-
+                
                 joinClause = "INNER JOIN tag ON event.\(Event.Columns.id.name) = tag.\(Tag.Columns.eventID.name)"
             }
-
+            
             if let beforeLt {
                 whereConditions.append("event.\(Event.Columns.lt.name) < ?")
                 arguments.append(beforeLt)
             }
-
+            
             let limitClause = "LIMIT \(limit)"
             let orderClause = "ORDER BY event.\(Event.Columns.lt.name) DESC"
             let whereClause = whereConditions.count > 0 ? "WHERE \(whereConditions.joined(separator: " AND "))" : ""
-
+            
             let sql = """
                 SELECT DISTINCT event.*
                 FROM event
@@ -121,14 +121,14 @@ extension EventStorage {
                 \(orderClause)
                 \(limitClause)
                 """
-
+            
             let rows = try Row.fetchAll(db.makeStatement(sql: sql), arguments: StatementArguments(arguments))
             return try rows.map { row -> Event in
                 try Event(row: row)
             }
         }
     }
-
+    
     func event(id: String) throws -> Event? {
         try dbPool.read { db in
             try Event
@@ -136,7 +136,7 @@ extension EventStorage {
                 .fetchOne(db)
         }
     }
-
+    
     func events(ids: [String]) throws -> [Event] {
         try dbPool.read { db in
             try Event
@@ -144,7 +144,7 @@ extension EventStorage {
                 .fetchAll(db)
         }
     }
-
+    
     func latestEvent() throws -> Event? {
         try dbPool.read { db in
             try Event
@@ -153,7 +153,7 @@ extension EventStorage {
                 .fetchOne(db)
         }
     }
-
+    
     func oldestEvent() throws -> Event? {
         try dbPool.read { db in
             try Event
@@ -162,7 +162,7 @@ extension EventStorage {
                 .fetchOne(db)
         }
     }
-
+    
     func tagTokens() throws -> [TagToken] {
         try dbPool.write { db in
             let request = Tag
@@ -170,19 +170,19 @@ extension EventStorage {
                 .select(Tag.Columns.platform, Tag.Columns.jettonAddress)
                 .distinct()
             let rows = try Row.fetchAll(db, request)
-
+            
             return rows.compactMap { row in
                 TagToken(platform: row[0], jettonAddress: row[1])
             }
         }
     }
-
+    
     func save(eventSyncState: EventSyncState) throws {
         _ = try dbPool.write { db in
             try eventSyncState.insert(db)
         }
     }
-
+    
     func save(events: [Event]) throws {
         _ = try dbPool.write { db in
             for event in events {
@@ -190,11 +190,11 @@ extension EventStorage {
             }
         }
     }
-
+    
     func resave(tags: [Tag], eventIDs: [String]) throws {
         _ = try dbPool.write { db in
             try Tag.filter(eventIDs.contains(Tag.Columns.eventID)).deleteAll(db)
-
+            
             for tag in tags {
                 try tag.insert(db)
             }

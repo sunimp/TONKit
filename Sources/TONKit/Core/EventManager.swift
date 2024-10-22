@@ -6,6 +6,8 @@
 //
 
 import Combine
+import Foundation
+
 import SWExtensions
 import SWToolKit
 import TONSwift
@@ -16,20 +18,20 @@ class EventManager {
     // MARK: Static Properties
 
     private static let limit = 100
-
+    
     // MARK: Properties
 
     @DistinctPublished
     private(set) var syncState: SyncState = .notSynced(error: Kit.SyncError.notStarted)
-
+    
     private let address: Address
     private let api: IApi
     private let storage: EventStorage
     private let logger: Logger?
     private var tasks = Set<AnyTask>()
-
+    
     private let eventSubject = PassthroughSubject<EventInfoWithTags, Never>()
-
+    
     // MARK: Lifecycle
 
     init(address: Address, api: IApi, storage: EventStorage, logger: Logger?) {
@@ -38,18 +40,18 @@ class EventManager {
         self.storage = storage
         self.logger = logger
     }
-
+    
     // MARK: Functions
 
     private func handleLatest(events: [Event]) {
         let inProgressEvents = events.filter { $0.inProgress }
         let completedEvents = events.filter { !$0.inProgress }
-
+        
         var eventsToHandle = [Event]()
-
+        
         if !completedEvents.isEmpty {
             let existingEvents = (try? storage.events(ids: completedEvents.map { $0.id })) ?? []
-
+            
             for completedEvent in completedEvents {
                 if let existingEvent = existingEvents.first(where: { $0.id == completedEvent.id }) {
                     if existingEvent.inProgress {
@@ -60,24 +62,24 @@ class EventManager {
                 }
             }
         }
-
+        
         handle(events: inProgressEvents + eventsToHandle, initial: false)
     }
-
+    
     private func handle(events: [Event], initial: Bool) {
         guard !events.isEmpty else {
             return
         }
-
+        
         try? storage.save(events: events)
-
+        
         let eventsWithTags = events.map { event in
             EventWithTags(event: event, tags: event.tags(address: address))
         }
-
+        
         let tags = eventsWithTags.map { $0.tags }.flatMap { $0 }
         try? storage.resave(tags: tags, eventIDs: events.map { $0.id })
-
+        
         eventSubject.send(EventInfoWithTags(events: eventsWithTags, initial: initial))
     }
 }
@@ -90,7 +92,7 @@ extension EventManager {
             return nil
         }
     }
-
+    
     func events(tagQuery: TagQuery, beforeLt: Int64?, limit: Int?) -> [Event] {
         do {
             return try storage.events(tagQuery: tagQuery, beforeLt: beforeLt, limit: limit ?? 100)
@@ -98,7 +100,7 @@ extension EventManager {
             return []
         }
     }
-
+    
     func eventPublisher(tagQuery: TagQuery) -> AnyPublisher<EventInfo, Never> {
         if tagQuery.isEmpty {
             return eventSubject
@@ -119,7 +121,7 @@ extension EventManager {
                                     return eventWithTags.event
                                 }
                             }
-
+                            
                             return nil
                         },
                         initial: info.initial
@@ -131,7 +133,7 @@ extension EventManager {
                 .eraseToAnyPublisher()
         }
     }
-
+    
     func tagTokens() -> [TagToken] {
         do {
             return try storage.tagTokens()
@@ -139,27 +141,27 @@ extension EventManager {
             return []
         }
     }
-
+    
     func sync() {
         logger?.log(level: .debug, message: "Syncing transactions...")
-
+        
         guard !syncState.syncing else {
             logger?.log(level: .debug, message: "Already syncing transactions")
             return
         }
-
+        
         syncState = .syncing
-
+        
         Task { [weak self, address, api, storage] in
             do {
                 let latestEvent = try storage.latestEvent()
-
+                
                 if let latestEvent {
                     self?.logger?.log(level: .debug, message: "Fetching latest events...")
-
+                    
                     let startTimestamp = latestEvent.timestamp
                     var beforeLt: Int64?
-
+                    
                     repeat {
                         let events = try await api.getEvents(
                             address: address,
@@ -171,26 +173,26 @@ extension EventManager {
                             level: .debug,
                             message: "Got latest events: \(events.count), beforeLt: \(beforeLt ?? -1), startTimestamp: \(startTimestamp)"
                         )
-
+                        
                         self?.handleLatest(events: events)
-
+                        
                         if events.count < Self.limit {
                             break
                         }
-
+                        
                         beforeLt = events.last?.lt
                     } while true
                 }
-
+                
                 let eventSyncState = try storage.eventSyncState()
                 let allSynced = eventSyncState?.allSynced ?? false
-
+                
                 if !allSynced {
                     self?.logger?.log(level: .debug, message: "Fetching history events...")
-
+                    
                     let oldestEvent = try storage.oldestEvent()
                     var beforeLt = oldestEvent?.lt
-
+                    
                     repeat {
                         let events = try await api.getEvents(
                             address: address,
@@ -202,13 +204,13 @@ extension EventManager {
                             level: .debug,
                             message: "Got history events: \(events.count), beforeLt: \(beforeLt ?? -1)"
                         )
-
+                        
                         self?.handle(events: events, initial: true)
-
+                        
                         if events.count < Self.limit {
                             break
                         }
-
+                        
                         beforeLt = events.last?.lt
                     } while
                         true
@@ -219,7 +221,7 @@ extension EventManager {
                         try? storage.save(eventSyncState: .init(allSynced: true))
                     }
                 }
-
+                
                 self?.syncState = .synced
             } catch {
                 self?.logger?.log(level: .error, message: "Transactions sync error: \(error)")
@@ -234,7 +236,7 @@ extension EventManager {
         let event: Event
         let tags: [Tag]
     }
-
+    
     private struct EventInfoWithTags {
         let events: [EventWithTags]
         let initial: Bool

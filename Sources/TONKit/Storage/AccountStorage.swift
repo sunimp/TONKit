@@ -15,12 +15,12 @@ class AccountStorage {
     // MARK: Properties
 
     private let dbPool: DatabasePool
-
+    
     // MARK: Computed Properties
 
     var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
-
+        
         migrator.registerMigration("Create account") { db in
             try db.create(table: "account", body: { t in
                 t.primaryKey(Account.Columns.address.name, .text, onConflict: .replace)
@@ -28,7 +28,7 @@ class AccountStorage {
                 t.column(Account.Columns.status.name, .text).notNull()
             })
         }
-
+        
         return migrator
     }
 
@@ -36,7 +36,7 @@ class AccountStorage {
 
     init(dbPool: DatabasePool) throws {
         self.dbPool = dbPool
-
+        
         try migrator.migrate(dbPool)
     }
 }
@@ -47,7 +47,7 @@ extension AccountStorage {
             try Account.filter(Account.Columns.address == address).fetchOne(db)
         }
     }
-
+    
     func save(account: Account) throws {
         _ = try dbPool.write { db in
             try account.insert(db)

@@ -10,6 +10,7 @@ import GRDB
 import TONSwift
 
 // MARK: - BigUInt + DatabaseValueConvertible
+
 #if compiler(>=6)
 extension BigUInt: @retroactive DatabaseValueConvertible { }
 #else
@@ -29,6 +30,7 @@ extension BigUInt {
 }
 
 // MARK: - Address + DatabaseValueConvertible
+
 #if compiler(>=6)
 extension Address: @retroactive DatabaseValueConvertible { }
 #else

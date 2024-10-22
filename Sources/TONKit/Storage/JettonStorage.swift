@@ -14,12 +14,12 @@ class JettonStorage {
     // MARK: Properties
 
     private let dbPool: DatabasePool
-
+    
     // MARK: Computed Properties
 
     var migrator: DatabaseMigrator {
         var migrator = DatabaseMigrator()
-
+        
         migrator.registerMigration("Create jettonBalance") { db in
             try db.create(table: "jettonBalance", body: { t in
                 t.primaryKey(JettonBalance.Columns.jettonAddress.name, .text, onConflict: .replace)
@@ -28,7 +28,7 @@ class JettonStorage {
                 t.column(JettonBalance.Columns.walletAddress.name, .text).notNull()
             })
         }
-
+        
         return migrator
     }
 
@@ -36,7 +36,7 @@ class JettonStorage {
 
     init(dbPool: DatabasePool) throws {
         self.dbPool = dbPool
-
+        
         try migrator.migrate(dbPool)
     }
 }
@@ -47,11 +47,11 @@ extension JettonStorage {
             try JettonBalance.fetchAll(db)
         }
     }
-
+    
     func update(jettonBalances: [JettonBalance]) throws {
         _ = try dbPool.write { db in
             try JettonBalance.deleteAll(db)
-
+            
             for jettonBalance in jettonBalances {
                 try jettonBalance.insert(db)
             }

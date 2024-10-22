@@ -15,6 +15,6 @@ protocol IApi {
     func getAccountSeqno(address: Address) async throws -> Int
     func getJettonInfo(address: Address) async throws -> Jetton
     func getRawTime() async throws -> Int
-    func emulate(boc: String) async throws -> EmulateResult
+    func estimateFee(boc: String) async throws -> BigUInt
     func send(boc: String) async throws
 }

@@ -1,16 +1,15 @@
 //
 //  SyncState.swift
+//  TONKit
 //
 //  Created by Sun on 2024/6/13.
 //
-
-import Foundation
 
 // MARK: - SyncState
 
 public enum SyncState {
     case synced
-    case syncing(progress: Double?)
+    case syncing
     case notSynced(error: Error)
 
     // MARK: Computed Properties
@@ -42,7 +41,7 @@ extension SyncState: Equatable {
     public static func == (lhs: SyncState, rhs: SyncState) -> Bool {
         switch (lhs, rhs) {
         case (.synced, .synced): return true
-        case let (.syncing(lhsProgress), .syncing(rhsProgress)): return lhsProgress == rhsProgress
+        case (.syncing, .syncing): return true
         case let (.notSynced(lhsError), .notSynced(rhsError)): return "\(lhsError)" == "\(rhsError)"
         default: return false
         }
@@ -54,9 +53,9 @@ extension SyncState: Equatable {
 extension SyncState: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .synced: return "synced"
-        case let .syncing(progress): return "syncing \(progress ?? 0)"
-        case let .notSynced(error): return "not synced: \(error)"
+        case .synced: return "Synced"
+        case .syncing: return "Syncing"
+        case let .notSynced(error): return "Not Synced: \(error)"
         }
     }
 }

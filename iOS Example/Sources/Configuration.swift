@@ -1,25 +1,26 @@
 //
 //  Configuration.swift
-//  TONKit-Demo
+//  TONKit-Example
 //
-//  Created by Sun on 2024/8/26.
+//  Created by Sun on 2024/10/22.
 //
 
-import Foundation
-
-import WWToolKit
+import SWToolKit
 import TONKit
 
 class Configuration {
     static let shared = Configuration()
 
-    let network: Network = .mainNet
+    let network: Network = .testNet
     let minLogLevel: Logger.Level = .verbose
 
-    let defaultsWords = "vivid episode rabbit vapor they expose excess ten fog old ridge abandon"
+    let defaultsWords = ""
     let defaultPassphrase = ""
 
-    let defaultsWatchAddress = "EQDtFpEwcFAEcRe5mLVh2N6C0x-_hJEM7W61_JLnSF74p4q2"
-    let defaultSendAddress = "UQDd5wJZ_lA98nktDHFqVfXIU9j3ZNtDt_8Zm3kB530jBWMZ"
-    let defaultTrc20ContractAddress = "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj"
+    let defaultsWatchAddress = ""
+    let defaultSendAddress = ""
+
+    static func isTestNet() -> Bool {
+        shared.network == .testNet
+    }
 }

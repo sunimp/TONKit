@@ -1,14 +1,13 @@
 //
 //  TagToken.swift
+//  TONKit
 //
 //  Created by Sun on 2024/6/13.
 //
 
-import Foundation
-
-import TonSwift
+import TONSwift
 
 public struct TagToken {
-    public let `protocol`: TransactionTag.TagProtocol
-    public let contractAddress: TonSwift.Address?
+    public let platform: Tag.Platform
+    public let jettonAddress: Address?
 }

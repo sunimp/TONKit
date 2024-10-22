@@ -1,39 +1,31 @@
 //
 //  Jetton.swift
+//  TONKit
 //
 //  Created by Sun on 2024/6/20.
 //
 
 import Foundation
+import TONSwift
 
-import TonSwift
+// MARK: - Jetton
 
-public struct Jetton {
-    // MARK: Properties
-
+public struct Jetton: Codable, Equatable, Hashable {
     public let address: Address
-    public let walletAddress: Address
+    public let name: String
+    public let symbol: String
+    public let decimals: Int
+    public let image: String?
+    public let verification: VerificationType
+}
 
-    // MARK: Lifecycle
+// MARK: Jetton.VerificationType
 
-    init(address: Address, walletAddress: Address) {
-        self.address = address
-        self.walletAddress = walletAddress
-    }
-    
-    init?(balance: Balance) {
-        let raw = Kit.address(jettonID: balance.id)
-        guard let address = try? Address.parse(raw: raw) else {
-            return nil
-        }
-        guard
-            let walletRaw = balance.wallet,
-            let walletAddress = try? Address.parse(raw: walletRaw)
-        else {
-            return nil
-        }
-        
-        self.address = address
-        self.walletAddress = walletAddress
+extension Jetton {
+    public enum VerificationType: String, Codable {
+        case whitelist
+        case blacklist
+        case none
+        case unknown
     }
 }

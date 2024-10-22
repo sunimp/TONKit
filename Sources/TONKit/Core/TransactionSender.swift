@@ -1,123 +1,67 @@
 //
 //  TransactionSender.swift
+//  TONKit
 //
 //  Created by Sun on 2024/6/13.
 //
 
-import Foundation
-
 import BigInt
-import TonSwift
+import Foundation
+import TONSwift
 
 // MARK: - TransactionSender
 
 class TransactionSender {
     // MARK: Properties
 
-    private let api: TONApi
+    private let api: IApi
     private let contract: WalletContract
-    private let sender: Address
-    private let secretKey: Data
 
     // MARK: Lifecycle
 
-    init(api: TONApi, contract: WalletContract, sender: Address, secretKey: Data) {
+    init(api: IApi, contract: WalletContract) {
         self.api = api
         self.contract = contract
-        self.sender = sender
-        self.secretKey = secretKey
     }
-}
 
-// MARK: - Amount
+    // MARK: Functions
 
-public struct Amount {
-    // MARK: Properties
+    private func safeTimeout(TTL: UInt64 = 5 * 60) async -> UInt64 {
+        do {
+            let rawTime = try await api.getRawTime()
+            return UInt64(rawTime) + TTL
+        } catch {
+            return UInt64(Date().timeIntervalSince1970) + TTL
+        }
+    }
 
-    let value: BigUInt
-    let isMax: Bool
+    private func boc(transferData: TransferData, signer: WalletTransferSigner) async throws -> String {
+        let seqno = try await api.getAccountSeqno(address: transferData.sender)
+        let timeout = await safeTimeout()
 
-    // MARK: Lifecycle
-
-    public init(value: BigUInt, isMax: Bool) {
-        self.value = value
-        self.isMax = isMax
+        return try ExternalMessageTransferBuilder.externalMessageTransfer(
+            contract: contract,
+            sender: transferData.sender,
+            sendMode: transferData.sendMode,
+            seqno: UInt64(seqno),
+            internalMessages: transferData.internalMessages,
+            timeout: timeout,
+            signer: signer
+        )
     }
 }
 
 extension TransactionSender {
-    func estimatedFee(
-        recipient: FriendlyAddress,
-        jetton: Jetton? = nil,
-        amount: Amount,
-        comment: String?
-    ) async throws
-        -> Decimal {
-        do {
-            let seqno = try await api.getSeqno(address: sender)
-            let timeout = await api.timeoutSafely()
-            let data = TransferData(
-                contract: contract,
-                sender: sender,
-                seqno: UInt64(seqno),
-                amount: amount.value,
-                isMax: amount.isMax,
-                recipient: recipient.address,
-                isBounceable: recipient.isBounceable,
-                comment: comment,
-                timeout: timeout
-            ) { transfer in
-                try transfer.signMessage(signer: WalletTransferEmptyKeySigner())
-            }
-
-            let boc: String =
-                if let jetton {
-                    try await JettonTransferBoc(jetton: jetton.walletAddress, transferData: data).create()
-                } else {
-                    try await TONTransferBoc(transferData: data).create()
-                }
-            
-            let transactionInfo = try await api.emulateMessageWallet(boc: boc)
-
-            // for nfts transactionInfo.event can contains extra
-            return Decimal(transactionInfo.trace.transaction.totalFees)
-        } catch {
-            print(error)
-            return 0
-        }
+    func emulate(transferData: TransferData) async throws -> EmulateResult {
+        let boc = try await boc(transferData: transferData, signer: WalletTransferEmptyKeySigner())
+        return try await api.emulate(boc: boc)
     }
 
-    func sendTransaction(
-        recipient: FriendlyAddress,
-        jetton: Jetton? = nil,
-        amount: Amount,
-        comment: String?
-    ) async throws {
-        let seqno = try await api.getSeqno(address: sender)
-        let timeout = await api.timeoutSafely()
-        let secretKey = secretKey
+    func boc(transferData: TransferData, secretKey: Data) async throws -> String {
+        try await boc(transferData: transferData, signer: WalletTransferSecretKeySigner(secretKey: secretKey))
+    }
 
-        let data = TransferData(
-            contract: contract,
-            sender: sender,
-            seqno: UInt64(seqno),
-            amount: amount.value,
-            isMax: amount.isMax,
-            recipient: recipient.address,
-            isBounceable: recipient.isBounceable,
-            comment: comment,
-            timeout: timeout
-        ) { transfer in
-            try transfer.signMessage(signer: WalletTransferSecretKeySigner(secretKey: secretKey))
-        }
-
-        let boc: String =
-            if let jetton {
-                try await JettonTransferBoc(jetton: jetton.walletAddress, transferData: data).create()
-            } else {
-                try await TONTransferBoc(transferData: data).create()
-            }
-
-        try await api.sendTransaction(boc: boc)
+    func send(boc: String) async throws {
+        return try await api.send(boc: boc)
     }
 }
